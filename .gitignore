@@ -1,0 +1,9 @@
+*.pyc
+
+/backend/backend/__pycache__
+
+/backend/backend/migrations/__pycache__
+
+/backend/__pycache__
+
+/.VSCodeCounter
