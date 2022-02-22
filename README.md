@@ -70,10 +70,6 @@ conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/
 conda install pytorch torchvision torchaudio cudatoolkit=11.3
 ```
 
-
-
-
-
 检查pytorch和cuda是否可用
 
 ```python
@@ -91,11 +87,22 @@ torch.cuda.current_device()
 # 返回当前设备索引
 ```
 
-
-
 ### 1.2.前端运行相关配置
 
 ### 1.3.后端运行相关配置
+
+Python版本：3.9.7（随anaconda安装）
+
+需要包：
+```
+conda install django
+conda install pymysql
+conda install -c conda-forge djangorestframework
+conda install -c conda-forge django-cors-headers
+conda install -c conda-forge coreapi
+markdown
+conda install -c conda-forge django-filter
+```
 
 ## 相关链接
 
