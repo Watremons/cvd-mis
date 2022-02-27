@@ -102,6 +102,8 @@ conda install -c conda-forge django-cors-headers
 conda install -c conda-forge coreapi
 markdown
 conda install -c conda-forge django-filter
+
+pip install pycocotools
 ```
 
 ## 相关链接
@@ -109,4 +111,3 @@ conda install -c conda-forge django-filter
 [清华大学开源软件镜像站](https://mirrors.tuna.tsinghua.edu.cn/)
 
 [CUDA](https://developer.nvidia.com/cuda-toolkit-archive)
-
