@@ -1,9 +1,19 @@
 *.pyc
 
+# 后端文件
 /backend/backend/__pycache__
 
 /backend/backend/migrations/__pycache__
 
 /backend/__pycache__
+
+# 模型相关文件
+/backend/vbar_detect_v3/__pycache__
+
+/backend/vbar_detect_v3/*/__pycache__
+
+/backend/vbar_detect_v3/out_images
+
+/backend/vbar_detect_v3/test.mp4
 
 /.VSCodeCounter
