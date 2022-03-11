@@ -5,6 +5,7 @@ import numpy as np
 from PIL import Image
 
 from pyheatmap.heatmap import HeatMap
+from sqlalchemy import false
 
 from nets.yolox import YOLO
 from nets import yolact_dect
@@ -96,7 +97,7 @@ def point2str(point):
     return "[{0},{1}]\n".format(point[0], point[1])
 
 
-def video_vibrate_detect(project_name: str, video_path: str):
+def video_vibrate_detect(project_name: str, video_path: str, make_pic: bool):
     """
     do video_vibrate_detect
 
@@ -176,7 +177,8 @@ def video_vibrate_detect(project_name: str, video_path: str):
 
         cv2.imshow("video", frame)
         out.write(frame)
-        cv2.imwrite(os.path.join(out_dir, "{:05d}.jpg".format(frame_count)), frame)
+        if make_pic:
+            cv2.imwrite(os.path.join(out_dir, "{:05d}.jpg".format(frame_count)), frame)
         frame_count += 1
 
         c = cv2.waitKey(1) & 0xff
@@ -195,4 +197,4 @@ def video_vibrate_detect(project_name: str, video_path: str):
 
 
 if __name__ == '__main__':
-    video_vibrate_detect('test', './test.mp4')
+    video_vibrate_detect(project_name='test', video_path='./test.mp4', make_pic=false)
