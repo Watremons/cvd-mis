@@ -104,6 +104,7 @@ markdown
 conda install -c conda-forge django-filter
 
 pip install pycocotools
+pip install pyheatmap
 ```
 
 ## 相关链接
