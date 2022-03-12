@@ -1,11 +1,14 @@
 *.pyc
+*.log
 
 # 后端文件
 /backend/backend/__pycache__
 
-/backend/backend/migrations/__pycache__
+/backend/misback/migrations/__pycache__
 
-/backend/__pycache__
+/backend/misback/__pycache__
+
+/backend/log
 
 # 模型相关文件
 /backend/vbar_detect_v3/__pycache__
