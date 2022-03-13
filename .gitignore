@@ -10,6 +10,8 @@
 
 /backend/log
 
+/backend/media/*/*
+
 # 模型相关文件
 /backend/vbar_detect_v3/__pycache__
 
