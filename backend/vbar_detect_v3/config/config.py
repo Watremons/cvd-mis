@@ -1,3 +1,4 @@
+import os
 from nets.backbone4yolact import ResNetBackbone, VGGBackbone, ResNetBackboneGN, DarkNetBackbone
 from math import sqrt
 import torch
@@ -850,7 +851,7 @@ def parse_args(argv=None):
     parser = argparse.ArgumentParser(
         description='YOLACT COCO Evaluation')
     parser.add_argument('--trained_model',
-                        default='model_data/yolact_base_2121_70000.pth', type=str,
+                        default=os.path.join(os.getcwd(), 'vbar_detect_v3', 'model_data', 'yolact_base_2121_70000.pth'), type=str,
                         help='Trained state_dict file path to open. If "interrupt", this will open the interrupt file.')
     # parser.add_argument('--image', default="E:/DeepLearningCode/test_yolact/cut_test1.jpg", type=str,
     #                     help='A path to an image to use for display.')

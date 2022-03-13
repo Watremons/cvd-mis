@@ -22,8 +22,8 @@ class YOLO(object):
         #   model_path指向logs文件夹下的权值文件，classes_path指向model_data下的txt
         #   如果出现shape不匹配，同时要注意训练时的model_path和classes_path参数的修改
         #--------------------------------------------------------------------------#
-        "model_path"        : 'model_data/zdj_yolox_s.pth',
-        "classes_path"      : 'model_data/zdj_classes.txt',
+        "model_path"        : os.path.join(os.getcwd(), 'vbar_detect_v3', 'model_data', 'zdj_yolox_s.pth'),
+        "classes_path"      : os.path.join(os.getcwd(), 'vbar_detect_v3', 'model_data', 'zdj_classes.txt'),
         #---------------------------------------------------------------------#
         #   输入图片的大小，必须为32的倍数。
         #---------------------------------------------------------------------#
