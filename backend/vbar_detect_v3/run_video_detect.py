@@ -97,7 +97,7 @@ def point2str(point):
     return "[{0},{1}]\n".format(point[0], point[1])
 
 
-def video_vibrate_detect(project_name: str, video_path: str, make_pic: bool):
+def video_vibrate_detect(project_name: str, video_file: str, make_pic: int):
     """
     do video_vibrate_detect
 
@@ -107,14 +107,14 @@ def video_vibrate_detect(project_name: str, video_path: str, make_pic: bool):
     """
     yolo = YOLO()
     yolact = YOLACT()
-    print("[Info] {0} video detect start!".format(project_name))
+    print("[Info] '{0}' project detection start!".format(project_name))
     # 检查目标目录是否存在，并创建
-    # [1]参数1：数据文件保存路径
-    out_dir = os.path.join('.', 'out_images', project_name)
+    # 数据文件保存路径
+    out_dir = os.path.join(os.getcwd(), 'media', project_name)
     if not os.path.isdir(out_dir):
         os.mkdir(out_dir)
     # 调用摄像头，若有参数则改为获取参数指定的视频文件
-    capture = cv2.VideoCapture(video_path)
+    capture = cv2.VideoCapture(os.path.join(out_dir, video_file))
     # capture=cv2.VideoCapture(0)
 
     # 获取原始视频帧率及总帧数
@@ -122,7 +122,7 @@ def video_vibrate_detect(project_name: str, video_path: str, make_pic: bool):
     # print("Frame Number = {0}".format(capture.get(cv2.CAP_PROP_FRAME_COUNT)))
 
     fourcc = cv2.VideoWriter_fourcc(*"XVID")
-    out = cv2.VideoWriter(os.path.join(out_dir, '{0}_result.avi'.format('test')), fourcc, 25, (600, 584))
+    out = cv2.VideoWriter(os.path.join(out_dir, '{0}_result.avi'.format(project_name)), fourcc, 25, (600, 584))
 
     fps = 0.0
     points = []
@@ -177,7 +177,7 @@ def video_vibrate_detect(project_name: str, video_path: str, make_pic: bool):
 
         cv2.imshow("video", frame)
         out.write(frame)
-        if make_pic:
+        if make_pic == 1:
             cv2.imwrite(os.path.join(out_dir, "{:05d}.jpg".format(frame_count)), frame)
         frame_count += 1
 
@@ -197,4 +197,8 @@ def video_vibrate_detect(project_name: str, video_path: str, make_pic: bool):
 
 
 if __name__ == '__main__':
-    video_vibrate_detect(project_name='test', video_path='./test.mp4', make_pic=false)
+    # print(video_vibrate_detect([2000,4000],[[50,60],[120,40]],[100,256]))
+    # sys.argv = [project_name: str, video_path: str, make_pic: int]
+    # video_vibrate_detect(eval(sys.argv[1]), eval(sys.argv[2]), eval(sys.argv[3]))
+    # print(rateModel(torch.from_numpy(np.array([57.2]))))
+    video_vibrate_detect(project_name='test', video_file='test.mp4', make_pic=1)
