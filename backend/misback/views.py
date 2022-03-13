@@ -1,13 +1,26 @@
 # -*- coding:utf-8 -*-
-# Import from Django lib
+# Import from standard libs
+import json
+import time
+import datetime
+from operator import itemgetter
+from itertools import groupby
+import traceback
+import jwt
+import secrets
+import hashlib
+import os
+import shutil
+import logging
+
+# Import from django libs
 from django.http import JsonResponse
-# from django_redis import get_redis_connection
+from django.conf import settings
 from django.utils import timezone
 from django.core import paginator
 from django.forms.models import model_to_dict
 from django.db.models import Count, F
 from django.utils.decorators import method_decorator
-import logging
 
 # Import from DRF lib
 from django_filters.rest_framework import DjangoFilterBackend
@@ -17,36 +30,13 @@ from rest_framework import viewsets
 # Import from customized component
 # from backend.misback import customSerializers, models, filters, paginations
 from misback import customSerializers, models, filters, paginations
-# from misback.location import splitImg
-# from misback.annotation import seg
-# from misback.recognition import k_means
-from django.conf import settings
-
-# Import from standard libs
-import json
-import time
-import datetime
-from operator import itemgetter
-from itertools import groupby
-import jwt
-import secrets
-import hashlib
-import os
-import shutil
+from misback.getPrediction import SendParamsToCmd
 
 # Set log file
 logger = logging.getLogger("django")
 
 
 # Create your views here.
-
-# 对传入的密码和salt进行md5加密，返回得到的加密密码
-def hash_pwd(pwd, salt):
-    h = hashlib.md5()
-    pwd = pwd + salt
-    h.update(pwd.encode())
-    return h.hexdigest()
-
 
 # Functions
 # Generate token
@@ -99,156 +89,176 @@ def token_auth(function):
     return authenticate
 
 
-# # Login View
-# # Params: userName, userPassword
-# # Return 404 if no account, wrong password
-# # Return 200 if success
-# def log_in(request):
-#     # 若已经登录，直接进入已登录账号
-#     if request.method == "POST":
-#         # 从参数获取phoneNum和password
-#         user_name = request.POST.get('userName', None)
-#         user_password = request.POST.get('userPassword', None)
-#         if user_name and user_password:
-#             user_name = user_name.strip()
-#             try:
-#                 # 从数据库获取phonenum和对应userId，取出salt
-#                 # 获取失败则捕捉错误
-#                 log_in_user = models.Users.objects.filter(userName=user_name)
-#                 if not log_in_user.exists():
-#                     return JsonResponse({"message": "该账号不存在", "status": 404})
-#                 log_in_user = log_in_user.first()
+# Login View
+# Params: userName, userPassword
+# Return 404 if no account, wrong password
+# Return 200 if success
+def log_in(request):
+    # 若已经登录，直接进入已登录账号
+    if request.method == "POST":
+        # 从参数获取phoneNum和password
+        user_name = request.POST.get('userName', None)
+        password = request.POST.get('password', None)
+        if user_name and password:
+            user_name = user_name.strip()
+            try:
+                # 从数据库获取phonenum和对应userId，取出salt
+                # 获取失败则捕捉错误
+                log_in_user = models.User.objects.filter(userName=user_name)
+                if not log_in_user.exists():
+                    return JsonResponse({"message": "该账号不存在", "status": 404})
+                log_in_user = log_in_user.first()
 
-#                 # 判断是否和存储密码相同
-#                 if (log_in_user.logindata.userPassword == user_password):
-#                     # 若相同，设置登录状态为True，设置登录id为userId
-#                     payload = {
-#                         'user_id': log_in_user.userId,
-#                         'expire': (timezone.now() + datetime.timedelta(days=7)).timestamp()
-#                     }
-#                     token = generate_token(payload)
-#                     # logging.debug(request.session.get('userId', None))
-#                     response = JsonResponse({
-#                         "message": "登录成功",
-#                         "status": 200,
-#                         "token": token
-#                         })
-#                     # response["Access-Control-Allow-Credentials"] = "true"
-#                     # response["Access-Control-Allow-Methods"] = 'GET, POST, PATCH, PUT, OPTIONS'
-#                     # response["Access-Control-Allow-Headers"] = "Origin,Content-Type,Cookie,Accept,Token"
-#                     return response
-#                 else:
-#                     return JsonResponse({"message": "密码错误", "status": 404})
-#             except Exception as e:
-#                 logging.error('str(Exception):\t', str(Exception))
-#                 logging.error('str(e):\t\t', str(e))
-#                 logging.error('repr(e):\t', repr(e))
-#                 logging.error('e.message:\t', e.args)
-#                 logging.error('########################################################')
-#                 return JsonResponse({"message": "数据库错误", "status": 404})
-#         else:
-#             return JsonResponse({"message": "登录表单填写不完整", "status": 404})
-#     else:
-#         return JsonResponse({"message": "请求方式未注册", "status": 404})
-
-
-# # 登出函数视图
-# # 从redis获取对应session并删除
-# # 登出成功，返回消息和200状态码
-# # 登出失败，返回消息和404状态码
-# def log_out(request):
-#     request.session.flush()
-#     # del request.session['isLogin']
-#     # del request.session['userId']
-#     # del request.session['userName']
-#     response = JsonResponse({"message": "登出成功", "status": 200})
-#     return response
+                # 判断是否和存储密码相同
+                if (log_in_user.logindata.userPassword == password):
+                    # 若相同，设置登录状态为True，设置登录id为userId
+                    payload = {
+                        'uid': log_in_user.uid,
+                        'expire': (timezone.now() + datetime.timedelta(days=7)).timestamp()
+                    }
+                    token = generate_token(payload)
+                    # logging.debug(request.session.get('userId', None))
+                    response = JsonResponse({
+                        "message": "登录成功",
+                        "status": 200,
+                        "token": token
+                        })
+                    # response["Access-Control-Allow-Credentials"] = "true"
+                    # response["Access-Control-Allow-Methods"] = 'GET, POST, PATCH, PUT, OPTIONS'
+                    # response["Access-Control-Allow-Headers"] = "Origin,Content-Type,Cookie,Accept,Token"
+                    return response
+                else:
+                    return JsonResponse({"message": "密码错误", "status": 404})
+            except Exception as e:
+                logging.error('str(Exception):\t', str(Exception))
+                logging.error('str(e):\t\t', str(e))
+                logging.error('repr(e):\t', repr(e))
+                logging.error('e.message:\t', e.args)
+                logging.error('########################################################')
+                return JsonResponse({"message": "数据库错误", "status": 404})
+        else:
+            return JsonResponse({"message": "登录表单填写不完整", "status": 404})
+    else:
+        return JsonResponse({"message": "请求方式未注册", "status": 404})
 
 
-# # 注册函数视图
-# # 从参数获取userName，phonenum,email,password,verifyCode
-# # 验证判断其合法性，并创建对应数据存入数据库
-# # 注册成功，返回消息和200状态码
-# # 注册失败，返回消息和404状态码
-# def sign_up(request):
-#     if request.method == "POST":
-#         userName = request.POST.get('userName', None)
-#         phoneNum = request.POST.get('phoneNum', None)
-#         email = request.POST.get('email', None)
-#         password = request.POST.get('password', None)
-#         verifyCode = request.POST.get('verifyCode', None)
-#         # logging.debug({
-#         #     "userName": userName,
-#         #     'phoneNum': phoneNum,
-#         #     'email': email,
-#         #     "password": password,
-#         #     'verifyCode': verifyCode
-#         # })
-
-#         # redisClient = get_redis_connection('smsCode')
-#         verifyCodeInCache = redisClient.get(phoneNum)
-#         # logging.debug(verifyCodeInCache)
-#         if verifyCodeInCache is None:
-#             return JsonResponse({"message": "尚未申请短信验证码", "status": 404})
-#         verifyCodeInCache = verifyCodeInCache.decode('ascii')
-
-#         if userName and phoneNum and email and password and verifyCode:  # 获取数据
-#             if verifyCodeInCache != verifyCode:
-#                 return JsonResponse({"message": "短信验证码错误，请检查重试", "status": 404})
-
-#             sameNameUser = models.PersonalProfile.objects.filter(userName=userName)
-#             if sameNameUser:  # 用户名唯一
-#                 return JsonResponse({"message": "用户已经存在，请重新输入用户名！", "status": 404})
-
-#             samePhoneUser = models.PersonalProfile.objects.filter(phoneNumber=phoneNum)
-#             if samePhoneUser:  # 手机号码唯一
-#                 return JsonResponse({"message": "该手机号码已被注册，请使用别的手机号码！", "status": 404})
-
-#             # 当一切都OK的情况下，创建新用户
-#             try:
-#                 newAccountInfo = models.AccountInformation.objects.create(
-#                     authority=models.Authority.objects.filter(authorityNo=1).first()
-#                 )
-
-#                 salt = secrets.token_hex(4)
-#                 encryPassword = hash_pwd(pwd=password, salt=salt)
-#                 newLoginData = models.LoginData.objects.create(
-#                     userId=newAccountInfo,
-#                     userPassword=encryPassword,
-#                     salt=salt
-#                 )
-#                 newUser = models.PersonalProfile.objects.create(
-#                     userId=newAccountInfo,
-#                     userName=userName,
-#                     phoneNumber=phoneNum,
-#                     email=email
-#                 )
-#                 logger.debug(json.dumps(newLoginData, cls=DateEnconding))
-#                 logger.debug(json.dumps(newUser, cls=DateEnconding))
-#                 redisClient.delete(phoneNum)
-#                 redisClient.delete(phoneNum+"Flag")
-
-#                 return JsonResponse({"message": "注册成功", "status": 200})
-#             except Exception as e:
-#                 logging.error('str(Exception):\t', str(Exception))
-#                 logging.error('str(e):\t\t', str(e))
-#                 logging.error('repr(e):\t', repr(e))
-#                 logging.error('e.message:\t', e.args)
-#                 logging.error('########################################################')
-
-#                 return JsonResponse({"message": "数据库出错，注册失败", "status": 200})
-#         else:
-#             return JsonResponse({"message": "注册表单填写不完整", "status": 404})
-#     else:
-#         return JsonResponse({"message": "请求方式未注册", "status": 404})
+# 登出函数视图
+# 从redis获取对应session并删除
+# 登出成功，返回消息和200状态码
+# 登出失败，返回消息和404状态码
+def log_out(request):
+    request.session.flush()
+    # del request.session['isLogin']
+    # del request.session['userId']
+    # del request.session['userName']
+    response = JsonResponse({"message": "登出成功", "status": 200})
+    return response
 
 
-# # get_page(get-page)根据bookId和pageNum获取页和相关定位框
-# # Params: bookId,pageNum
+# 注册函数视图
+# 从参数获取userName，phonenum,email,password,verifyCode
+# 验证判断其合法性，并创建对应数据存入数据库
+# 注册成功，返回消息和200状态码
+# 注册失败，返回消息和404状态码
+def sign_up(request):
+    if request.method == "POST":
+        userName = request.POST.get('userName', None)
+        password = request.POST.get('password', None)
+
+        if userName and password:  # 获取数据
+            sameNameUser = models.PersonalProfile.objects.filter(userName=userName)
+            if sameNameUser:  # 用户名唯一
+                return JsonResponse({"message": "用户已经存在，请重新输入用户名！", "status": 404})
+
+            # 当一切都OK的情况下，创建新用户
+            try:
+                newUserInfo = models.User.objects.create(
+                    userName=userName
+                )
+
+                newLoginData = models.LoginData.objects.create(
+                    uid=newUserInfo,
+                    userPassword=password,
+                )
+
+                logger.debug(json.dumps(newLoginData, cls=DateEnconding))
+                logger.debug(json.dumps(newUserInfo, cls=DateEnconding))
+
+                return JsonResponse({"message": "注册成功", "status": 200})
+            except Exception as e:
+                logging.error('str(Exception):\t', str(Exception))
+                logging.error('str(e):\t\t', str(e))
+                logging.error('repr(e):\t', repr(e))
+                logging.error('e.message:\t', e.args)
+                logging.error('########################################################')
+
+                return JsonResponse({"message": "数据库出错，注册失败", "status": 200})
+        else:
+            return JsonResponse({"message": "注册表单填写不完整", "status": 404})
+    else:
+        return JsonResponse({"message": "请求方式未注册", "status": 404})
+
+
+# run_detect(run-detect)创建一个新的检测项目
+# Params: pid
+# Return 404 if no pid, no pageNum
+# Return 200 if success
+# @token_auth
+def run_detect(request):
+    if request.method == "POST":
+        # 从参数获取bookId和pageNum
+        pid = request.POST.get('pid', None)
+        if pid:
+            try:
+                query_project_set = models.Project.objects.filter(pid=pid)
+                if not query_project_set.exists():
+                    return JsonResponse({"message": "检测项目pid错误", "status": 404})
+
+                # Change the status
+                query_project_set.update(projectStatus=1)
+
+                query_project = query_project_set.first()
+
+                project_run_result = SendParamsToCmd(
+                    project_name=query_project.projectName,
+                    video_file=query_project.videoFile,
+                    make_pic=0,
+                ).decode()
+
+                print(project_run_result)
+
+                # page_dict = {
+                #     "pageId": query_page.pageId,
+                #     "pageIndex": query_page.pageIndex,
+                #     "pagePhotoUrl": query_page.pagePhotoUrl,
+                #     "bookId": query_page.bookId.bookId,
+                #     "pageContent": query_page.pageContent
+                # }
+
+                # boxList = []
+                # for box in query_boxes:
+                #     box_dict = model_to_dict(box)
+                #     boxList.append(box_dict)
+                # page_dict["boxList"] = boxList
+                return JsonResponse({"status": 200, 'pageInfo': project_run_result})
+
+            except Exception as e:
+                logging.error(e.args)
+                logging.error(traceback.format_exc())
+                logging.error('########################################################')
+                return JsonResponse({"message": "数据库错误", "status": 404})
+        else:
+            return JsonResponse({"message": "表单填写不完整", "status": 404})
+    else:
+        return JsonResponse({"message": "请求方式未注册", "status": 404})
+
+
+# # create_project(create-project)创建一个新的检测项目
+# # Params: bookId, pageNum
 # # Return 404 if no bookId, no pageNum
 # # Return 200 if success
 # @token_auth
-# def get_page(request):
+# def create_project(request):
 #     if request.method == "POST":
 #         # 从参数获取bookId和pageNum
 #         book_id = request.POST.get('bookId', None)
@@ -284,10 +294,8 @@ def token_auth(function):
 #                 page_dict["boxList"] = boxList
 #                 return JsonResponse({"status": 200, 'pageInfo': page_dict})
 #             except Exception as e:
-#                 logging.error('str(Exception):\t', str(Exception))
-#                 logging.error('str(e):\t\t', str(e))
-#                 logging.error('repr(e):\t', repr(e))
-#                 logging.error('e.message:\t', e.args)
+#                 logging.error(e.args)
+#                 logging.error(traceback.format_exc())
 #                 logging.error('########################################################')
 #                 return JsonResponse({"message": "数据库错误", "status": 404})
 #         else:
@@ -363,10 +371,8 @@ def token_auth(function):
 
 #                 return JsonResponse({"message": "更新成功", "status": 200})
 #             except Exception as e:
-#                 logging.error('str(Exception):\t', str(Exception))
-#                 logging.error('str(e):\t\t', str(e))
-#                 logging.error('repr(e):\t', repr(e))
-#                 logging.error('e.message:\t', e.args)
+#                 logging.error(e.args)
+#                 logging.error(traceback.format_exc())
 #                 logging.error('########################################################')
 #                 return JsonResponse({"message": "数据库错误", "status": 404})
 #         else:
@@ -425,10 +431,8 @@ def token_auth(function):
 #                 page_dict["wordlist"] = wordlist
 #                 return JsonResponse(page_dict)
 #             except Exception as e:
-#                 logging.error('str(Exception):\t', str(Exception))
-#                 logging.error('str(e):\t\t', str(e))
-#                 logging.error('repr(e):\t', repr(e))
-#                 logging.error('e.message:\t', e.args)
+#                 logging.error(e.args)
+#                 logging.error(traceback.format_exc())
 #                 logging.error('########################################################')
 #                 return JsonResponse({"message": "数据库错误", "status": 404})
 #         else:
@@ -487,10 +491,8 @@ def token_auth(function):
 
 #                 return JsonResponse({"message": "更新成功", "status": 200})
 #             except Exception as e:
-#                 logging.error('str(Exception):\t', str(Exception))
-#                 logging.error('str(e):\t\t', str(e))
-#                 logging.error('repr(e):\t', repr(e))
-#                 logging.error('e.message:\t', e.args)
+#                 logging.error(e.args)
+#                 logging.error(traceback.format_exc())
 #                 logging.error('########################################################')
 #                 return JsonResponse({"message": "数据库错误", "status": 404})
 #         else:
@@ -535,10 +537,8 @@ def token_auth(function):
 
 #                 return JsonResponse({"message": "更新成功", "status": 200})
 #             except Exception as e:
-#                 logging.error('str(Exception):\t', str(Exception))
-#                 logging.error('str(e):\t\t', str(e))
-#                 logging.error('repr(e):\t', repr(e))
-#                 logging.error('e.message:\t', e.args)
+#                 logging.error(e.args)
+#                 logging.error(traceback.format_exc())
 #                 logging.error('########################################################')
 #                 return JsonResponse({"message": "数据库错误", "status": 404})
 #         else:
@@ -632,10 +632,8 @@ def token_auth(function):
 #                 })
 
 #             except Exception as e:
-#                 logging.error('str(Exception):\t', str(Exception))
-#                 logging.error('str(e):\t\t', str(e))
-#                 logging.error('repr(e):\t', repr(e))
-#                 logging.error('e.message:\t', e.args)
+#                 logging.error(e.args)
+#                 logging.error(traceback.format_exc())
 #                 logging.error('########################################################')
 #                 return JsonResponse({"message": "数据库错误", "status": 404})
 #         else:
@@ -659,10 +657,8 @@ def token_auth(function):
 #                     result.append(pic_path)
 #                 return JsonResponse({"status": 200, 'result': result})
 #             except Exception as e:
-#                 logging.error('str(Exception):\t', str(Exception))
-#                 logging.error('str(e):\t\t', str(e))
-#                 logging.error('repr(e):\t', repr(e))
-#                 logging.error('e.message:\t', e.args)
+#                 logging.error(e.args)
+#                 logging.error(traceback.format_exc())
 #                 logging.error('########################################################')
 #                 return JsonResponse({"message": "数据库错误", "status": 404})
 #         else:
