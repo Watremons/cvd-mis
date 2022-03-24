@@ -1,9 +1,12 @@
+import logging
 import subprocess
-import json
 import os
 
+# Set log file
+logger = logging.getLogger("django")
 
-def SendParamsToCmd(project_name: str, video_file: str, make_pic: int):
+
+def SendParamsToCmd(pid: int, project_name: str, video_file: str, make_pic: int):
     # projectNameStr = json.dumps(project_name, separators=(',', ':'))
     # videoPathStr = json.dumps(video_path, separators=(',', ':'))
     # makePicStr = json.dumps(make_pic, separators=(',', ':'))
@@ -20,7 +23,7 @@ def SendParamsToCmd(project_name: str, video_file: str, make_pic: int):
         "import os\n",
         "from run_video_detect import video_vibrate_detect\n",
         "if __name__ == '__main__':\n",
-        "\tvideo_vibrate_detect(project_name='{0}', video_file='{1}', make_pic={2})\n".format(project_name, video_file, make_pic)
+        "\tvideo_vibrate_detect(pid={0}, project_name='{1}', video_file='{2}', make_pic={3})\n".format(pid, project_name, video_file, make_pic)
     ])
     fo.close()
     try:
@@ -32,7 +35,7 @@ def SendParamsToCmd(project_name: str, video_file: str, make_pic: int):
         # print(resultList)
         return result
     except subprocess.CalledProcessError as exc:
-        print('returncode:', exc.returncode)
-        print('cmd:', exc.cmd)
-        print('output:', exc.output.decode())
+        logging.error('returncode:', exc.returncode)
+        logging.error('cmd:', exc.cmd)
+        logging.error('output:', exc.output.decode())
         return list("Return a non-list result!")
