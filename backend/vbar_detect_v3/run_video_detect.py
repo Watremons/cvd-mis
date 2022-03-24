@@ -97,7 +97,7 @@ def point2str(point):
     return "[{0},{1}]\n".format(point[0], point[1])
 
 
-def video_vibrate_detect(project_name: str, video_file: str, make_pic: int):
+def video_vibrate_detect(pid: int, project_name: str, video_file: str, make_pic: int):
     """
     do video_vibrate_detect
 
@@ -110,7 +110,7 @@ def video_vibrate_detect(project_name: str, video_file: str, make_pic: int):
     print("[Info] '{0}' project detection start!".format(project_name))
     # 检查目标目录是否存在，并创建
     # 数据文件保存路径
-    out_dir = os.path.join(os.getcwd(), 'media', project_name)
+    out_dir = os.path.join(os.getcwd(), 'media', '{0}_{1}'.format(pid, project_name))
     if not os.path.isdir(out_dir):
         os.mkdir(out_dir)
     # 调用摄像头，若有参数则改为获取参数指定的视频文件
@@ -122,7 +122,7 @@ def video_vibrate_detect(project_name: str, video_file: str, make_pic: int):
     # print("Frame Number = {0}".format(capture.get(cv2.CAP_PROP_FRAME_COUNT)))
 
     fourcc = cv2.VideoWriter_fourcc(*"XVID")
-    out = cv2.VideoWriter(os.path.join(out_dir, '{0}_result.avi'.format(project_name)), fourcc, 25, (600, 584))
+    out = cv2.VideoWriter(os.path.join(out_dir, '{0}_{1}_result.avi'.format(pid, project_name)), fourcc, 25, (600, 584))
 
     fps = 0.0
     points = []
@@ -175,9 +175,9 @@ def video_vibrate_detect(project_name: str, video_file: str, make_pic: int):
             frame = cv2.putText(frame, "[{}, {}]".format(point[0], point[1]), (point[0], point[1]), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
             points.append(point)
 
-        cv2.imshow("video", frame)
         out.write(frame)
         if make_pic == 1:
+            cv2.imshow('{0}_{1}'.format(pid, project_name), frame)
             cv2.imwrite(os.path.join(out_dir, "{:05d}.jpg".format(frame_count)), frame)
         frame_count += 1
 
@@ -201,4 +201,4 @@ if __name__ == '__main__':
     # sys.argv = [project_name: str, video_path: str, make_pic: int]
     # video_vibrate_detect(eval(sys.argv[1]), eval(sys.argv[2]), eval(sys.argv[3]))
     # print(rateModel(torch.from_numpy(np.array([57.2]))))
-    video_vibrate_detect(project_name='test', video_file='test.mp4', make_pic=1)
+    video_vibrate_detect(pid=1, project_name='test', video_file='test.mp4', make_pic=1)
