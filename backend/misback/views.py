@@ -30,7 +30,7 @@ from rest_framework import viewsets
 # Import from customized component
 # from backend.misback import customSerializers, models, filters, paginations
 from misback import customSerializers, models, filters, paginations
-from misback.getPrediction import SendParamsToCmd
+from misback.tasks import cvd_detect_task
 
 # Set log file
 logger = logging.getLogger("django")
@@ -39,6 +39,14 @@ logger = logging.getLogger("django")
 # Create your views here.
 
 # Functions
+# Generate payload, expire in 7 days
+def generate_payload(uid):
+    return {
+        'uid': uid,
+        'expire': (timezone.now() + datetime.timedelta(days=7)).timestamp()
+    }
+
+
 # Generate token
 def generate_token(payload):
     token = jwt.encode(
@@ -76,11 +84,8 @@ def token_auth(function):
                     return JsonResponse({"message": "身份认证过期，请重新登陆", "status": 403})
                 return function(request, *args, **kwargs)
             except Exception as e:
-                logging.error('Login Error:\t\t', e)
-                logging.error('str(Exception):\t', str(Exception))
-                logging.error('str(e):\t\t', str(e))
-                logging.error('repr(e):\t', repr(e))
-                logging.error('e.message:\t', e.args)
+                logging.error(e.args)
+                logging.error(traceback.format_exc())
                 logging.error('########################################################')
                 return JsonResponse({"message": "检测到可能的恶意攻击，登陆已被拦截", "status": 404})
         else:
@@ -112,10 +117,7 @@ def log_in(request):
                 # 判断是否和存储密码相同
                 if (log_in_user.logindata.userPassword == password):
                     # 若相同，设置登录状态为True，设置登录id为userId
-                    payload = {
-                        'uid': log_in_user.uid,
-                        'expire': (timezone.now() + datetime.timedelta(days=7)).timestamp()
-                    }
+                    payload = generate_payload(log_in_user.uid)
                     token = generate_token(payload)
                     # logging.debug(request.session.get('userId', None))
                     response = JsonResponse({
@@ -130,10 +132,8 @@ def log_in(request):
                 else:
                     return JsonResponse({"message": "密码错误", "status": 404})
             except Exception as e:
-                logging.error('str(Exception):\t', str(Exception))
-                logging.error('str(e):\t\t', str(e))
-                logging.error('repr(e):\t', repr(e))
-                logging.error('e.message:\t', e.args)
+                logging.error(e.args)
+                logging.error(traceback.format_exc())
                 logging.error('########################################################')
                 return JsonResponse({"message": "数据库错误", "status": 404})
         else:
@@ -144,6 +144,7 @@ def log_in(request):
 
 # 登出函数视图
 # 从redis获取对应session并删除
+# 前端自己清除对应token
 # 登出成功，返回消息和200状态码
 # 登出失败，返回消息和404状态码
 def log_out(request):
@@ -186,10 +187,8 @@ def sign_up(request):
 
                 return JsonResponse({"message": "注册成功", "status": 200})
             except Exception as e:
-                logging.error('str(Exception):\t', str(Exception))
-                logging.error('str(e):\t\t', str(e))
-                logging.error('repr(e):\t', repr(e))
-                logging.error('e.message:\t', e.args)
+                logging.error(e.args)
+                logging.error(traceback.format_exc())
                 logging.error('########################################################')
 
                 return JsonResponse({"message": "数据库出错，注册失败", "status": 200})
@@ -210,22 +209,27 @@ def run_detect(request):
         pid = request.POST.get('pid', None)
         if pid:
             try:
-                query_project_set = models.Project.objects.filter(pid=pid)
-                if not query_project_set.exists():
-                    return JsonResponse({"message": "检测项目pid错误", "status": 404})
+                # query_project_set = models.Project.objects.filter(pid=pid)
+                # if not query_project_set.exists():
+                #     return JsonResponse({"message": "检测项目pid错误", "status": 404})
 
-                # Change the status
-                query_project_set.update(projectStatus=1)
+                # # Change the status
+                # query_project_set.update(projectStatus=1)
 
-                query_project = query_project_set.first()
+                # query_project = query_project_set.first()
 
-                project_run_result = SendParamsToCmd(
-                    project_name=query_project.projectName,
-                    video_file=query_project.videoFile,
-                    make_pic=0,
-                ).decode()
+                # project_run_result = SendParamsToCmd(
+                #     pid=pid
+                #     project_name=query_project.projectName,
+                #     video_file=query_project.videoFile,
+                #     make_pic=0,
+                # ).decode()
+                # print(project_run_result)
 
-                print(project_run_result)
+                project_run_celery = cvd_detect_task.delay(
+                    pid=pid
+                )
+                print(project_run_celery.task_id)
 
                 # page_dict = {
                 #     "pageId": query_page.pageId,
@@ -240,7 +244,12 @@ def run_detect(request):
                 #     box_dict = model_to_dict(box)
                 #     boxList.append(box_dict)
                 # page_dict["boxList"] = boxList
-                return JsonResponse({"status": 200, 'pageInfo': project_run_result})
+                return JsonResponse({
+                    'status': 200,
+                    'message': {
+                        'task_id':  project_run_celery.task_id
+                    }
+                })
 
             except Exception as e:
                 logging.error(e.args)
