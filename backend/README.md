@@ -6,6 +6,30 @@
 
 本部分为CVD-MIS后端部分
 
+启动方式
+
+```bash
+# 后端服务器
+python manage.py runserver
+
+# celery职程
+celery -A backend worker -l info -P eventlet -c 1000
+celery -A backend worker -l info -c 4
+# 由于celery 4.x以上版本不支持windows10操作系统，因此需要降低版本到3.x版本或
+# celery多职程
+celery multi start w1 -A backend -l info --pidfile=../../celery/%n.pid \
+                                        --logfile=../../celery/%n%I.log
+```
+
+停止方式
+
+```bash
+# 服务器可直接使用Ctrl+C停止
+# celery职程可直接使用Ctrl+C停止
+# celery多职程
+celery multi stopwait w1 -A backend -l info
+```
+
 ## 1.配置说明
 
 ### 1.1.模型运行相关配置
