@@ -105,6 +105,8 @@ conda install -c conda-forge django-filter
 
 pip install pycocotools
 pip install pyheatmap
+pip install celery
+pip install eventlet
 ```
 
 ## 相关链接
