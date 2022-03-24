@@ -153,6 +153,15 @@ MEDIA_URL = '/media/'
 # 以上表示浏览器传来的url以media开头的，django统一到MEDIA_ROOT配置的目录下去找
 
 
+# Celery相关配置
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379/1'  # Broker配置，使用Redis作为消息中间件
+
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/2'  # BACKEND配置，这里使用redis
+
+CELERY_RESULT_SERIALIZER = 'json'  # 结果序列化方案
+
+CELERY_TIMEZONE = TIME_ZONE
+
 # Logger settings
 BASE_LOG_DIR = os.path.join(BASE_DIR, "log")
 LOGGING = {
