@@ -5,7 +5,6 @@ import numpy as np
 from PIL import Image
 
 from pyheatmap.heatmap import HeatMap
-from sqlalchemy import false
 
 from nets.yolox import YOLO
 from nets import yolact_dect
