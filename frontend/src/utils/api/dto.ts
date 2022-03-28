@@ -4,5 +4,5 @@ interface IResult {
 }
 
 export interface ILoginResult extends IResult {
-  token: string;
+  token?: string;
 }
