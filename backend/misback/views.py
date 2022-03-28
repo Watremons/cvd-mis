@@ -115,7 +115,7 @@ def log_in(request):
                 log_in_user = log_in_user.first()
 
                 # 判断是否和存储密码相同
-                if (log_in_user.logindata.userPassword == password):
+                if (log_in_user.logindata.password == password):
                     # 若相同，设置登录状态为True，设置登录id为userId
                     payload = generate_payload(log_in_user.uid)
                     token = generate_token(payload)
@@ -229,7 +229,7 @@ def run_detect(request):
                 project_run_celery = cvd_detect_task.delay(
                     pid=pid
                 )
-                print(project_run_celery.task_id)
+                logging.debug('task_id',project_run_celery.task_id)
 
                 # page_dict = {
                 #     "pageId": query_page.pageId,
