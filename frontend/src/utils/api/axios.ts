@@ -1,4 +1,4 @@
-import axios, { AxiosRequestConfig } from "axios";
+import axios, { AxiosRequestConfig } from 'axios';
 
 export interface McAxiosRequestConfig extends AxiosRequestConfig {
   extraConfig?: {
@@ -10,11 +10,11 @@ const timeout = 60000; // 请求超时时间和延迟请求超时时间统一设
 
 const config: McAxiosRequestConfig = {
   // baseURL: (import.meta.env.VITE_BASE_URL as string) || "/",
-  baseURL: '127.0.0.1:8000/',
+  baseURL: '/api',
   timeout,
   headers: {
-    "Content-Type": "application/json",
-  },
+    'Content-Type': 'application/json'
+  }
 };
 
 const instance = axios.create(config);
@@ -22,26 +22,26 @@ const instance = axios.create(config);
 instance.interceptors.request.use(async (config: McAxiosRequestConfig) => {
   if (!config.extraConfig?.tokenRetryCount) {
     config.extraConfig = {
-      tokenRetryCount: 0,
+      tokenRetryCount: 0
     };
   }
   return config;
 });
 
 instance.interceptors.response.use(
-  (response) => {
+  response => {
     return response;
   },
-  async (err) => {
+  async err => {
     if (axios.isCancel(err)) {
       // 取消的请求，不报错
       return;
     }
 
-    if (err.message === "Network Error") {
+    if (err.message === 'Network Error') {
       return;
     }
-    if (err.message.includes("timeout")) {
+    if (err.message.includes('timeout')) {
       return;
     }
     if (err.response?.status >= 500) {

@@ -1,9 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import instance, { McAxiosRequestConfig } from './axios';
 import { AxiosInstance, AxiosResponse } from 'axios';
 
 type RequestMethod = 'get' | 'post';
 class Request {
-  
   private instance: AxiosInstance;
 
   constructor(instance: AxiosInstance) {
@@ -16,10 +16,7 @@ class Request {
    * @param {McAxiosRequestConfig} config
    * @return Promise<AxiosResponse<any>>
    */
-  public get(
-    url: string,
-    config: McAxiosRequestConfig = {}
-  ): Promise<AxiosResponse<any>> {
+  public get(url: string, config: McAxiosRequestConfig = {}): Promise<AxiosResponse<any>> {
     return this.request('get', url, config);
   }
 
@@ -29,20 +26,11 @@ class Request {
    * @param {McAxiosRequestConfig} config
    * @return Promise<AxiosResponse<any>>
    */
-  public post(
-    url: string,
-    data: any = {},
-    config: McAxiosRequestConfig = {}
-  ): Promise<AxiosResponse<any>> {
+  public post(url: string, data: any = {}, config: McAxiosRequestConfig = {}): Promise<AxiosResponse<any>> {
     return this.request('post', url, config, data);
   }
 
-  private async request(
-    method: RequestMethod,
-    url: string,
-    config: McAxiosRequestConfig,
-    ...params: any
-  ) {
+  private async request(method: RequestMethod, url: string, config: McAxiosRequestConfig, ...params: any) {
     const res = await this.instance[method](url, ...params, config);
     return res;
   }
