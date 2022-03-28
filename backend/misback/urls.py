@@ -6,10 +6,10 @@ router = DefaultRouter()
 
 urlpatterns = [
     # log_in(log-in)根据账号密码登陆
-    # path('log-in/', views.log_in, name='log-in'),
+    path('login/', views.log_in, name='login'),
 
     # 运行检测模型
-    path('run-detect', views.run_detect, name='run-detect'),
+    path('run-detect/', views.run_detect, name='run-detect'),
 
     # 以下为对任意模型的增删改查
 
