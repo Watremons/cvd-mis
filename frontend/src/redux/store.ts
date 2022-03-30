@@ -1,10 +1,10 @@
 import { configureStore } from '@reduxjs/toolkit';
 
-import pathReducer from './path/path';
+import userReducer from './reducers/user';
 
 export const store = configureStore({
   reducer: {
-    pathReducer
+    userReducer
   }
 });
 
