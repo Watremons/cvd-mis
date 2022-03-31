@@ -1,9 +1,9 @@
 import React, { ReactElement } from 'react';
 import { Navigate } from 'react-router';
+import { getToken } from '../utils/utils';
 
 export default function Authentication(props: { children: ReactElement }) {
-  const token = localStorage.getItem('token');
-  console.log('token', token);
+  const token = getToken();
   if (token) {
     return props.children;
   } else {

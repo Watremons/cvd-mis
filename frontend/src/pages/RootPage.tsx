@@ -1,9 +1,9 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { judgeToken } from '../utils/utils';
+import { getToken } from '../utils/utils';
 
 export default function RootPage() {
-  if (judgeToken()) {
+  if (getToken()) {
     return <Navigate to="/home" replace={true} />;
   } else {
     return <Navigate to="/login" replace={true} />;
