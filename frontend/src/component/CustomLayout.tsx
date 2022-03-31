@@ -8,7 +8,6 @@ import CustomFooter from './CustomFooter';
 const { Content } = Layout;
 
 export default function CustomLayout(props: { children: ReactElement }) {
-  // console.log('props.children', props.children);
   return (
     <Layout>
       <CustomHeader />
