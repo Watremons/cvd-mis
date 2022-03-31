@@ -7,6 +7,8 @@ router = DefaultRouter()
 urlpatterns = [
     # log_in(log-in)根据账号密码登陆
     path('login/', views.log_in, name='login'),
+    # get_now_user(now-user)获取当前登录的用户信息
+    path('now-user/', views.get_now_user, name='now-user'),
 
     # 运行检测模型
     path('run-detect/', views.run_detect, name='run-detect'),

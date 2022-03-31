@@ -142,6 +142,40 @@ def log_in(request):
         return JsonResponse({"message": "请求方式未注册", "status": 404})
 
 
+# 获取当前登录用户视图
+# Params: /
+# Return 404 if no token
+# Return 200 if success
+@token_auth
+def get_now_user(request):
+    token = request.META.get("HTTP_TOKEN", None)
+    if token:
+        try:
+            data = jwt.decode(
+                token,
+                settings.SECRET_KEY,
+                algorithms=['HS256']
+            )
+            if data['uid']:
+                query_user_set = models.User.objects.filter(pk=data['uid'])
+                if not query_user_set.exists():
+                    return JsonResponse({"message": "该账号不存在", "status": 404})
+                now_user = query_user_set.first()
+
+            return JsonResponse({
+                "message": "获取当前账号成功",
+                "data": model_to_dict(now_user),
+                "status": 200
+            })
+        except Exception as e:
+            logging.error(e.args)
+            logging.error(traceback.format_exc())
+            logging.error('########################################################')
+            return JsonResponse({"message": "检测到可能的恶意攻击，登陆已被拦截", "status": 404})
+    else:
+        return JsonResponse({"message": "您尚未登录，请先登录", "status": 401})
+
+
 # 登出函数视图
 # 从redis获取对应session并删除
 # 前端自己清除对应token
@@ -229,7 +263,7 @@ def run_detect(request):
                 project_run_celery = cvd_detect_task.delay(
                     pid=pid
                 )
-                logging.debug('task_id',project_run_celery.task_id)
+                logging.debug('task_id', project_run_celery.task_id)
 
                 # page_dict = {
                 #     "pageId": query_page.pageId,
