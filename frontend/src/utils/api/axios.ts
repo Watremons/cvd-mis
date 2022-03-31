@@ -1,4 +1,5 @@
 import axios, { AxiosRequestConfig } from 'axios';
+import { getToken } from '../utils';
 
 export interface McAxiosRequestConfig extends AxiosRequestConfig {
   extraConfig?: {
@@ -11,22 +12,36 @@ const timeout = 60000; // 请求超时时间和延迟请求超时时间统一设
 const config: McAxiosRequestConfig = {
   // baseURL: (import.meta.env.VITE_BASE_URL as string) || "/",
   baseURL: '/api',
+  withCredentials: true,
   timeout,
   headers: {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    token: ''
   }
 };
 
 const instance = axios.create(config);
 
-instance.interceptors.request.use(async (config: McAxiosRequestConfig) => {
-  if (!config.extraConfig?.tokenRetryCount) {
-    config.extraConfig = {
-      tokenRetryCount: 0
-    };
+instance.interceptors.request.use(
+  async (config: McAxiosRequestConfig) => {
+    const token = getToken();
+    if (token && config.headers) {
+      config.headers.token = token;
+    }
+    if (!config.extraConfig?.tokenRetryCount) {
+      config.extraConfig = {
+        tokenRetryCount: 0
+      };
+    }
+    return config;
+  },
+  error => {
+    // throw error
+    error.data = {};
+    error.data.msg = '请求异常！';
+    return Promise.resolve(error);
   }
-  return config;
-});
+);
 
 instance.interceptors.response.use(
   response => {
