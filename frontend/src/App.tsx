@@ -11,9 +11,9 @@ function App() {
     <HashRouter>
       <Routes>
         <Route path="/" element={<RootPage />} />
-        <Route path="/login" element={<LoginPage />} />
+        <Route path="login" element={<LoginPage />} />
         <Route
-          path="/*"
+          path="*"
           element={
             <Authentication>
               <Dispatcher />
