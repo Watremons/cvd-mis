@@ -12,14 +12,18 @@ export default function CustomSider() {
   const [selectedOpenKeys, setSelectedOpenKeys] = useState<string[]>([]);
   const location = useLocation();
 
-  const onCollapse = (nowCollapsed: boolean) => {
-    console.log('nowCollapsed', nowCollapsed);
-    setCollapsed(nowCollapsed);
+  const onCollapse = (nowCollapsed: boolean) => setCollapsed(nowCollapsed);
+
+  const onSubMenuClick = ({ key }: { key: string }) => {
+    if (selectedOpenKeys.includes(key)) {
+      setSelectedOpenKeys((nowKeys: string[]) => nowKeys.filter((nowKey: string) => nowKey !== key));
+    } else {
+      setSelectedOpenKeys((nowKeys: string[]) => [...nowKeys, key]);
+    }
   };
 
   useEffect(() => {
     const paths = location.pathname.split('/');
-    console.log(paths);
 
     if (paths.length < 1) return;
     setSelectedKeys([paths[paths.length - 1]]);
@@ -32,12 +36,7 @@ export default function CustomSider() {
     <Sider className="custom-sider" collapsible collapsed={collapsed} onCollapse={onCollapse}>
       <Menu theme="dark" mode="inline" className="custom-menu" selectedKeys={selectedKeys} openKeys={selectedOpenKeys}>
         <Menu.Item key="dashboard">Dashboard</Menu.Item>
-        <SubMenu
-          key="user"
-          icon={<UserOutlined />}
-          title="用户页"
-          onTitleClick={({ key }) => setSelectedOpenKeys((nowKeys: string[]) => [...nowKeys, key])}
-        >
+        <SubMenu key="user" icon={<UserOutlined />} title="用户页" onTitleClick={onSubMenuClick}>
           <Menu.Item key="user-setting" icon={<SettingOutlined />}>
             <Link to="user/user-setting">用户设置</Link>
           </Menu.Item>
@@ -45,12 +44,7 @@ export default function CustomSider() {
             <Link to="user/user-manage">用户管理</Link>
           </Menu.Item>
         </SubMenu>
-        <SubMenu
-          key="project"
-          icon={<SnippetsOutlined />}
-          title="项目页"
-          onTitleClick={({ key }) => setSelectedOpenKeys((nowKeys: string[]) => [...nowKeys, key])}
-        >
+        <SubMenu key="project" icon={<SnippetsOutlined />} title="项目页" onTitleClick={onSubMenuClick}>
           <Menu.Item key="project-manage" icon={<AppstoreOutlined />}>
             <Link to="project/project-manage">项目管理</Link>
           </Menu.Item>
