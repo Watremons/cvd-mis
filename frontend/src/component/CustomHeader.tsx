@@ -4,13 +4,15 @@ import { LogoutOutlined } from '@ant-design/icons';
 
 import logo from '../logo.svg';
 import './CustomHeader.less';
+import { useAppSelector } from '../redux/hook';
 
 const { Header } = Layout;
 
 export default function CustomHeader() {
-  const username = localStorage.getItem('username');
+  const username = useAppSelector(state => state.userReducer.userName);
+  console.log(username);
   function handleMenuClick(e: any) {
-    console.log('click', e);
+    console.log('click logout');
   }
 
   const dropdownMenu = (

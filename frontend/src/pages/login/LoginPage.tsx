@@ -2,16 +2,19 @@ import React, { useState } from 'react';
 
 import { Alert, message, Tabs } from 'antd';
 import { LoginForm, ProFormCheckbox, ProFormText } from '@ant-design/pro-form';
+import { LockOutlined, UserOutlined } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 
 import logo from '../../logo.svg';
 import './LoginPage.less';
-
-import { defaultLoginResult } from './constant';
-import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import CustomFooter from '../../component/CustomFooter';
-import { login } from '../../utils/api/api';
-import { useNavigate } from 'react-router-dom';
+
 import { ILoginResult } from '../../utils/api/dto';
+import { fetchUserInfo, login } from '../../utils/api/api';
+import { getToken } from '../../utils/utils';
+import { defaultLoginResult } from './constant';
+import { useAppDispatch } from '../../redux/hook';
+import { changeUser } from '../../redux/reducers/user';
 
 const LoginMessage: React.FC<{
   content: string;
@@ -31,14 +34,17 @@ export default function LoginPage() {
 
   const [loginType, setLoginType] = useState<string>('account'); // type is account or mobild
   const [loginResult, setLoginResult] = useState<ILoginResult>(defaultLoginResult);
-  if (localStorage.getItem('token') || sessionStorage.getItem('token')) {
+
+  const dispatch = useAppDispatch();
+
+  if (getToken()) {
     if (navigate) navigate('/', { replace: true });
   }
   const handleSubmit = async (values: API.LoginParams) => {
-    console.log('loginParams', values);
     try {
       // 登录
       const msg = await login({ ...values });
+      setLoginResult(msg.data);
       if (msg.data.status === 200) {
         const defaultLoginSuccessMessage = msg.data.message;
         message.success(defaultLoginSuccessMessage);
@@ -49,7 +55,10 @@ export default function LoginPage() {
             sessionStorage.setItem('token', msg.data.token);
           }
         }
-        // await fetchUserInfo();
+        const { data } = await fetchUserInfo();
+        const userInfo = data.data;
+
+        dispatch(changeUser(userInfo));
         /** 跳转回初始页 */
         if (!navigate) return;
         navigate('/', { replace: true });
