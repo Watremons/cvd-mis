@@ -1,74 +1,41 @@
 declare namespace API {
-  type IUserInfo = {
-    uid: number;
-    userName: string;
-    userDes?: string;
-    createDate: number;
-    authority: number;
-    description?: string;
+  type IResult = {
+    message: string;
+    status: number;
   };
 
-  type PageParams = {
-    current?: number;
-    pageSize?: number;
+  type ILoginResult = IResult & {
+    token?: string;
   };
 
-  type RuleListItem = {
-    key?: number;
-    disabled?: boolean;
-    href?: string;
-    avatar?: string;
-    name?: string;
-    owner?: string;
-    desc?: string;
-    callNo?: number;
-    status?: number;
-    updatedAt?: string;
-    createdAt?: string;
-    progress?: number;
+  type INowUserResult = IResult & {
+    data: Entity.User;
   };
 
-  type RuleList = {
-    data?: RuleListItem[];
-    /** 列表的内容总数 */
-    total?: number;
-    success?: boolean;
+  type IPageResult = {
+    pageSize: number;
+    current: number;
+    total: number;
   };
 
-  type LoginParams = {
+  type IRestResult<T> = IPageResult & {
+    data: T[];
+  };
+
+  type ILoginParams = {
     username: string;
     password: string;
     autoLogin: boolean;
   };
 
-  type ErrorResponse = {
-    /** 业务约定的错误码 */
-    errorCode: string;
-    /** 业务上的错误信息 */
-    errorMessage?: string;
-    /** 业务上的请求是否成功 */
-    success?: boolean;
+  type IPageParams = {
+    pageSize: number;
+    current: number;
   };
 
-  type NoticeIconList = {
-    data?: NoticeIconItem[];
-    /** 列表的内容总数 */
-    total?: number;
-    success?: boolean;
-  };
-
-  type NoticeIconItemType = 'notification' | 'message' | 'event';
-
-  type NoticeIconItem = {
-    id?: string;
-    extra?: string;
-    key?: string;
-    read?: boolean;
-    avatar?: string;
-    title?: string;
-    status?: string;
-    datetime?: string;
-    description?: string;
-    type?: NoticeIconItemType;
+  type IQueryUserParams = IPageParams & {
+    authority?: string;
+    ordering?: string;
+    search?: string;
   };
 }

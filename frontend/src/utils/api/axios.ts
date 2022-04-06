@@ -45,6 +45,20 @@ instance.interceptors.request.use(
 
 instance.interceptors.response.use(
   response => {
+    const { data } = response;
+    const { status } = data;
+    if (parseInt(status)) {
+      switch (parseInt(status)) {
+        case 401: {
+          localStorage.removeItem('token');
+          sessionStorage.removeItem('token');
+          window.location.replace('/login');
+          break;
+        }
+        default:
+          break;
+      }
+    }
     return response;
   },
   async err => {
