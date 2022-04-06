@@ -1,5 +1,5 @@
 import React, { ReactElement } from 'react';
-import { Breadcrumb, Layout } from 'antd';
+import { Layout } from 'antd';
 
 import CustomHeader from './CustomHeader';
 import CustomSider from './CustomSider';
@@ -15,7 +15,7 @@ export default function CustomLayout(props: { children: ReactElement }) {
         <CustomSider />
         <Layout style={{ padding: '0 24px 24px' }}>
           {/* <Breadcrumb style={{ margin: '16px 0' }}>
-            <Breadcrumb.Item key="home">Home</Breadcrumb.Item>
+            <Breadcrumb.Item key="dashboard">Dashboard</Breadcrumb.Item>
             <Breadcrumb.Item key="list">List</Breadcrumb.Item>
             <Breadcrumb.Item key="app">App</Breadcrumb.Item>
           </Breadcrumb> */}
