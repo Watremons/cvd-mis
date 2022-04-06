@@ -9,12 +9,9 @@ import logo from '../../logo.svg';
 import './LoginPage.less';
 import CustomFooter from '../../component/CustomFooter';
 
-import { ILoginResult } from '../../utils/api/dto';
 import { fetchUserInfo, login } from '../../utils/api/api';
 import { getToken } from '../../utils/utils';
 import { defaultLoginResult } from './constant';
-import { useAppDispatch } from '../../redux/hook';
-import { changeUser } from '../../redux/reducers/user';
 
 const LoginMessage: React.FC<{
   content: string;
@@ -33,14 +30,12 @@ export default function LoginPage() {
   const navigate = useNavigate();
 
   const [loginType, setLoginType] = useState<string>('account'); // type is account or mobild
-  const [loginResult, setLoginResult] = useState<ILoginResult>(defaultLoginResult);
-
-  const dispatch = useAppDispatch();
+  const [loginResult, setLoginResult] = useState<API.ILoginResult>(defaultLoginResult);
 
   if (getToken()) {
     if (navigate) navigate('/', { replace: true });
   }
-  const handleSubmit = async (values: API.LoginParams) => {
+  const handleSubmit = async (values: API.ILoginParams) => {
     try {
       // 登录
       const msg = await login({ ...values });
@@ -48,17 +43,22 @@ export default function LoginPage() {
       if (msg.data.status === 200) {
         const defaultLoginSuccessMessage = msg.data.message;
         message.success(defaultLoginSuccessMessage);
-        if (msg.data.token) {
-          if (values.autoLogin) {
-            localStorage.setItem('token', msg.data.token);
-          } else {
-            sessionStorage.setItem('token', msg.data.token);
-          }
-        }
         const { data } = await fetchUserInfo();
         const userInfo = data.data;
 
-        dispatch(changeUser(userInfo));
+        if (msg.data.token) {
+          if (values.autoLogin) {
+            // 自动登录则保存到localStorage，后端控制时长为7 days
+            localStorage.setItem('token', msg.data.token);
+            localStorage.setItem('username', userInfo.userName);
+            localStorage.setItem('authority', userInfo.authority.toString());
+          } else {
+            sessionStorage.setItem('token', msg.data.token);
+            sessionStorage.setItem('username', userInfo.userName);
+            sessionStorage.setItem('authority', userInfo.authority.toString());
+          }
+        }
+
         /** 跳转回初始页 */
         if (!navigate) return;
         navigate('/', { replace: true });
@@ -81,7 +81,7 @@ export default function LoginPage() {
           title="混凝土振捣检测系统"
           subTitle="通过yolo定点检测混凝土振捣情况"
           initialValues={{ autoLogin: true }}
-          onFinish={async (values: API.LoginParams) => {
+          onFinish={async (values: API.ILoginParams) => {
             await handleSubmit(values);
           }}
         >

@@ -1,6 +1,4 @@
-import { ILoginResult } from '../../utils/api/dto';
-
-export const defaultLoginResult: ILoginResult = {
+export const defaultLoginResult: API.ILoginResult = {
   status: 0,
   message: '未登录'
 };
