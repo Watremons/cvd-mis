@@ -1,7 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { Layout, Menu } from 'antd';
-import { AppstoreAddOutlined, AppstoreOutlined, SettingOutlined, SnippetsOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons';
+import {
+  AppstoreAddOutlined,
+  AppstoreOutlined,
+  DashboardOutlined,
+  SettingOutlined,
+  SnippetsOutlined,
+  TeamOutlined,
+  UserOutlined
+} from '@ant-design/icons';
 import { Link, useLocation } from 'react-router-dom';
+
+import './CustomSider.less';
 
 const { SubMenu } = Menu;
 const { Sider } = Layout;
@@ -35,7 +45,9 @@ export default function CustomSider() {
   return (
     <Sider className="custom-sider" collapsible collapsed={collapsed} onCollapse={onCollapse}>
       <Menu theme="dark" mode="inline" className="custom-menu" selectedKeys={selectedKeys} openKeys={selectedOpenKeys}>
-        <Menu.Item key="dashboard">Dashboard</Menu.Item>
+        <Menu.Item key="dashboard" icon={<DashboardOutlined />}>
+          <Link to="dashboard/">Dashboard</Link>
+        </Menu.Item>
         <SubMenu key="user" icon={<UserOutlined />} title="用户页" onTitleClick={onSubMenuClick}>
           <Menu.Item key="user-setting" icon={<SettingOutlined />}>
             <Link to="user/user-setting">用户设置</Link>

@@ -1,8 +1,9 @@
 import { Row, Col, Card } from 'antd';
 import React from 'react';
 import logo from '../../logo.svg';
+import './DashboardPage.less';
 
-export default function HomePage() {
+export default function DashboardPage() {
   return (
     <Row>
       <Col span={24}>
