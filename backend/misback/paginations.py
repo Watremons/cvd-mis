@@ -7,9 +7,9 @@ class MyFormatResultsSetPagination(PageNumberPagination):
     分页器：继承PageNumberPagination，使用相关属性并重写函数。
     '''
     page_size_query_param = "pageSize"
-    page_query_param = 'pageIndex'
+    page_query_param = 'current'
     page_size = 5
-    max_page_size = 10
+    max_page_size = 100
 
     """
     自定义分页方法
@@ -20,7 +20,7 @@ class MyFormatResultsSetPagination(PageNumberPagination):
         """
         return Response({
             'data': data,
-            'pagination': self.page.paginator.count,
+            'total': self.page.paginator.count,
             'pageSize': self.page.paginator.per_page,
-            'pageIndex': self.page.start_index() // self.page.paginator.per_page + 1
+            'current': self.page.start_index() // self.page.paginator.per_page + 1
         })

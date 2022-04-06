@@ -7,8 +7,6 @@ from operator import itemgetter
 from itertools import groupby
 import traceback
 import jwt
-import secrets
-import hashlib
 import os
 import shutil
 import logging
@@ -67,8 +65,7 @@ class DateEnconding(json.JSONEncoder):
 
 # Decorations:
 # Access auth by token;
-# Return 403 if expire
-# Return 401 if no token
+# Return 401 if no token or expire
 # Return 404 else
 def token_auth(function):
     def authenticate(request, *args, **kwargs):
@@ -81,7 +78,7 @@ def token_auth(function):
                     algorithms=['HS256']
                 )
                 if data['expire'] < timezone.now().timestamp():
-                    return JsonResponse({"message": "身份认证过期，请重新登陆", "status": 403})
+                    return JsonResponse({"message": "身份认证过期，请重新登陆", "status": 401})
                 return function(request, *args, **kwargs)
             except Exception as e:
                 logging.error(e.args)
@@ -148,32 +145,35 @@ def log_in(request):
 # Return 200 if success
 @token_auth
 def get_now_user(request):
-    token = request.META.get("HTTP_TOKEN", None)
-    if token:
-        try:
-            data = jwt.decode(
-                token,
-                settings.SECRET_KEY,
-                algorithms=['HS256']
-            )
-            if data['uid']:
-                query_user_set = models.User.objects.filter(pk=data['uid'])
-                if not query_user_set.exists():
-                    return JsonResponse({"message": "该账号不存在", "status": 404})
-                now_user = query_user_set.first()
+    if request.method == "POST":
+        token = request.META.get("HTTP_TOKEN", None)
+        if token:
+            try:
+                data = jwt.decode(
+                    token,
+                    settings.SECRET_KEY,
+                    algorithms=['HS256']
+                )
+                if data['uid']:
+                    query_user_set = models.User.objects.filter(pk=data['uid'])
+                    if not query_user_set.exists():
+                        return JsonResponse({"message": "该账号不存在", "status": 404})
+                    now_user = query_user_set.first()
 
-            return JsonResponse({
-                "message": "获取当前账号成功",
-                "data": model_to_dict(now_user),
-                "status": 200
-            })
-        except Exception as e:
-            logging.error(e.args)
-            logging.error(traceback.format_exc())
-            logging.error('########################################################')
-            return JsonResponse({"message": "检测到可能的恶意攻击，登陆已被拦截", "status": 404})
+                return JsonResponse({
+                    "message": "获取当前账号成功",
+                    "data": model_to_dict(now_user),
+                    "status": 200
+                })
+            except Exception as e:
+                logging.error(e.args)
+                logging.error(traceback.format_exc())
+                logging.error('########################################################')
+                return JsonResponse({"message": "检测到可能的恶意攻击，登陆已被拦截", "status": 404})
+        else:
+            return JsonResponse({"message": "您尚未登录，请先登录", "status": 401})
     else:
-        return JsonResponse({"message": "您尚未登录，请先登录", "status": 401})
+        return JsonResponse({"message": "请求方式未注册", "status": 404})
 
 
 # 登出函数视图
@@ -182,12 +182,14 @@ def get_now_user(request):
 # 登出成功，返回消息和200状态码
 # 登出失败，返回消息和404状态码
 def log_out(request):
-    request.session.flush()
-    # del request.session['isLogin']
-    # del request.session['userId']
-    # del request.session['userName']
-    response = JsonResponse({"message": "登出成功", "status": 200})
-    return response
+    if request.method == "POST":
+        request.session.flush()
+        # del request.session['isLogin']
+        # del request.session['userId']
+        # del request.session['userName']
+        return JsonResponse({"message": "登出成功", "status": 200})
+    else:
+        return JsonResponse({"message": "请求方式未注册", "status": 404})
 
 
 # 注册函数视图
@@ -713,13 +715,16 @@ def run_detect(request):
 # Classes inherited from ModelViewSet which can generate RESTFUL URI
 @method_decorator(token_auth, name='dispatch')
 class UserViewSet(viewsets.ModelViewSet):
-    queryset = models.User.objects.all().order_by('uid')
-    # 默认按userNo排序
+    queryset = models.User.objects.all()
     serializer_class = customSerializers.UserSerializer
     pagination_class = paginations.MyFormatResultsSetPagination
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    search_fields = ['^userName']
-    filter_class = filters.UserFilter
+    search_fields = ['userName']
+    # filter_class = filters.UserFilter
+    filterset_fields = ['authority']
+    # 默认按uid排序, 可按uid或userProjectNum排序
+    ordering = ['uid']
+    ordering_fields = ['uid']
 
 
 @method_decorator(token_auth, name='dispatch')

@@ -9,7 +9,7 @@ class UserSerializer(serializers.ModelSerializer):
     userProjectNum = serializers.SerializerMethodField()
 
     def get_userProjectNum(self, obj):
-        return models.Project.objects.filter(Q(pid=obj.pid)).count()
+        return models.Project.objects.filter(Q(uid=obj.uid)).count()
 
     class Meta:
         model = User

@@ -5,8 +5,10 @@ from misback import views
 router = DefaultRouter()
 
 urlpatterns = [
-    # log_in(log-in)根据账号密码登陆
+    # log_in(login)根据账号密码登陆
     path('login/', views.log_in, name='login'),
+    # log_out(logout)登出当前账号
+    path('logout/', views.log_out, name='logout'),
     # get_now_user(now-user)获取当前登录的用户信息
     path('now-user/', views.get_now_user, name='now-user'),
 
