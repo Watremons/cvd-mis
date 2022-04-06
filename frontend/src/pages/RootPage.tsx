@@ -4,7 +4,7 @@ import { getToken } from '../utils/utils';
 
 export default function RootPage() {
   if (getToken()) {
-    return <Navigate to="/home" replace={true} />;
+    return <Navigate to="/dashboard" replace={true} />;
   } else {
     return <Navigate to="/login" replace={true} />;
   }
