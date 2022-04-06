@@ -1,18 +1,24 @@
 import React from 'react';
-import { Dropdown, Layout, Menu } from 'antd';
+import { Dropdown, Layout, Menu, message } from 'antd';
 import { LogoutOutlined } from '@ant-design/icons';
 
 import logo from '../logo.svg';
 import './CustomHeader.less';
-import { useAppSelector } from '../redux/hook';
+
+import { logout } from '../utils/api/api';
 
 const { Header } = Layout;
 
 export default function CustomHeader() {
-  const username = useAppSelector(state => state.userReducer.userName);
-  console.log(username);
-  function handleMenuClick(e: any) {
-    console.log('click logout');
+  const username = localStorage.getItem('username');
+  function handleMenuClick() {
+    logout().then(({ data }) => {
+      if (data.status == 200) {
+        localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
+        message.success('登出成功!');
+      }
+    });
   }
 
   const dropdownMenu = (
