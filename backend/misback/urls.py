@@ -23,6 +23,11 @@ urlpatterns = [
     path('user/<int:pk>/', views.UserViewSet.as_view({'get': 'retrieve', 'put': 'partial_update', 'delete': 'destroy'})),
 
     # 无参数：get=list all,post=create new
+    path('logindata', views.LoginDataViewSet.as_view({'post': 'create'})),
+    # 有参数：get=retrieve one,put=partial_update one,delete=delete one
+    path('logindata/<int:pk>/', views.LoginDataViewSet.as_view({'get': 'retrieve', 'put': 'partial_update', 'delete': 'destroy'})),
+
+    # 无参数：get=list all,post=create new
     path('project', views.ProjectViewSet.as_view({'get': 'list', 'post': 'create'})),
     # 有参数：get=retrieve one,put=partial_update one,delete=delete one
     path('project/<int:pk>/', views.ProjectViewSet.as_view({'get': 'retrieve', 'put': 'partial_update', 'delete': 'destroy'})),
