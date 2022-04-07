@@ -26,6 +26,12 @@ const LoginMessage: React.FC<{
   />
 );
 
+interface ILoginObj {
+  userName: string;
+  password: string;
+  autoLogin: boolean;
+}
+
 export default function LoginPage() {
   const navigate = useNavigate();
 
@@ -35,10 +41,10 @@ export default function LoginPage() {
   if (getToken()) {
     if (navigate) navigate('/', { replace: true });
   }
-  const handleSubmit = async (values: API.ILoginParams) => {
+  const handleSubmit = async (values: ILoginObj) => {
     try {
       // 登录
-      const msg = await login({ ...values });
+      const msg = await login({ userName: values.userName, password: values.password });
       setLoginResult(msg.data);
       if (msg.data.status === 200) {
         const defaultLoginSuccessMessage = msg.data.message;
@@ -50,11 +56,11 @@ export default function LoginPage() {
           if (values.autoLogin) {
             // 自动登录则保存到localStorage，后端控制时长为7 days
             localStorage.setItem('token', msg.data.token);
-            localStorage.setItem('username', userInfo.userName);
+            localStorage.setItem('userName', userInfo.userName);
             localStorage.setItem('authority', userInfo.authority.toString());
           } else {
             sessionStorage.setItem('token', msg.data.token);
-            sessionStorage.setItem('username', userInfo.userName);
+            sessionStorage.setItem('userName', userInfo.userName);
             sessionStorage.setItem('authority', userInfo.authority.toString());
           }
         }
@@ -81,7 +87,7 @@ export default function LoginPage() {
           title="混凝土振捣检测系统"
           subTitle="通过yolo定点检测混凝土振捣情况"
           initialValues={{ autoLogin: true }}
-          onFinish={async (values: API.ILoginParams) => {
+          onFinish={async (values: ILoginObj) => {
             await handleSubmit(values);
           }}
         >
@@ -92,7 +98,7 @@ export default function LoginPage() {
           {loginType === 'account' && (
             <>
               <ProFormText
-                name="username"
+                name="userName"
                 fieldProps={{
                   size: 'large',
                   prefix: <UserOutlined className={'prefixIcon'} />
