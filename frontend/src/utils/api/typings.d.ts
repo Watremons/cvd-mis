@@ -23,9 +23,8 @@ declare namespace API {
   };
 
   type ILoginParams = {
-    username: string;
+    userName: string;
     password: string;
-    autoLogin: boolean;
   };
 
   type IPageParams = {
@@ -37,5 +36,22 @@ declare namespace API {
     authority?: string;
     ordering?: string;
     search?: string;
+  };
+
+  type ICreateUserParams = {
+    userName: string;
+    password: string;
+    userDes?: string;
+    authority: number;
+    description?: string;
+  };
+
+  type IDeleteUserParams = {
+    uid: number;
+  };
+
+  type ICreateLoginDataParams = {
+    uid: number;
+    password: string;
   };
 }
