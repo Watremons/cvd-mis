@@ -8,4 +8,9 @@ declare namespace Entity {
     userProjectNum: number;
     description?: string;
   }
+
+  class LoginData {
+    uid: number;
+    password: string;
+  }
 }
