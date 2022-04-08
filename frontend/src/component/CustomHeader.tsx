@@ -10,7 +10,7 @@ import { logout } from '../utils/api/api';
 const { Header } = Layout;
 
 export default function CustomHeader() {
-  const username = localStorage.getItem('username');
+  const userName = localStorage.getItem('userName');
   function handleMenuClick() {
     logout().then(({ data }) => {
       if (data.status == 200) {
@@ -35,11 +35,9 @@ export default function CustomHeader() {
         <img src={logo} className="logo" />
         混凝土振捣检测系统
       </div>
-      <Menu theme="dark" mode="horizontal">
-        {/* <Menu.Item key="user">{username}</Menu.Item> */}
-      </Menu>
+      <Menu theme="dark" mode="horizontal"></Menu>
       <Dropdown.Button className="dropdown" overlay={dropdownMenu} placement="bottom">
-        {username ?? '未知用户'}
+        {userName ?? '未知用户'}
       </Dropdown.Button>
     </Header>
   );
