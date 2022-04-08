@@ -9,7 +9,7 @@ import logo from '../../logo.svg';
 import './LoginPage.less';
 import CustomFooter from '../../component/CustomFooter';
 
-import { fetchUserInfo, login } from '../../utils/api/api';
+import { fetchNowUser, login } from '../../utils/api/api';
 import { getToken } from '../../utils/utils';
 import { defaultLoginResult } from './constant';
 
@@ -49,7 +49,7 @@ export default function LoginPage() {
       if (msg.data.status === 200) {
         const defaultLoginSuccessMessage = msg.data.message;
         message.success(defaultLoginSuccessMessage);
-        const { data } = await fetchUserInfo();
+        const { data } = await fetchNowUser();
         const userInfo = data.data;
 
         if (msg.data.token) {
