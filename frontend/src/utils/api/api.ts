@@ -14,7 +14,7 @@ export async function logout(): Promise<AxiosResponse<API.IResult>> {
 }
 
 /** 获取当前用户信息接口 GET /api/misback/now-user/ */
-export async function fetchUserInfo(): Promise<AxiosResponse<API.INowUserResult>> {
+export async function fetchNowUser(): Promise<AxiosResponse<API.INowUserResult>> {
   return request.get('/misback/now-user/');
 }
 
@@ -24,17 +24,27 @@ export async function fetchUsers(body: API.IQueryUserParams): Promise<AxiosRespo
   return request.get(joinQueryUrl('/misback/user', body));
 }
 
-/** REST新增用户接口 GET /api/misback/user/ */
+/** REST新增用户接口 GET /api/misback/user */
 export async function createUser(body: API.ICreateUserParams): Promise<AxiosResponse<Entity.User>> {
   return request.post('/misback/user', toFormdata(body));
 }
 
-/** REST删除用户接口 GET /api/misback/user/<int:pk>/ */
+/** REST获取用户接口 GET /api/misback/user/<int:pk>/ */
+export async function fetchUser(body: API.IChooseUserParams): Promise<AxiosResponse<Entity.User>> {
+  return request.get(`/misback/user/${body.uid}/`);
+}
+
+/** REST删除用户接口 DELETE /api/misback/user/<int:pk>/ */
 export async function deleteUser(body: API.IDeleteUserParams): Promise<AxiosResponse<Entity.User>> {
   return request.delete(`/misback/user/${body.uid}/`);
 }
 
-/** REST新增用户登录信息接口 GET /api/misback/user/ */
+/** REST修改用户信息接口 DELETE /api/misback/user/<int:pk>/ */
+export async function updateUser(body: API.IUpdateUserParams): Promise<AxiosResponse<Entity.User>> {
+  return request.put(`/misback/user/${body.uid}/`, toFormdata(body));
+}
+
+/** REST新增用户登录信息接口 POST /api/misback/logindata */
 export async function createLoginData(body: API.ICreateLoginDataParams): Promise<AxiosResponse<Entity.LoginData>> {
   return request.post('/misback/logindata', toFormdata(body));
 }

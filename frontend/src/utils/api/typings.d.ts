@@ -46,8 +46,17 @@ declare namespace API {
     description?: string;
   };
 
-  type IDeleteUserParams = {
+  type IChooseUserParams = {
     uid: number;
+  };
+
+  type IDeleteUserParams = IChooseUserParams;
+
+  type IUpdateUserParams = IChooseUserParams & {
+    userName: string;
+    userDes?: string;
+    authority: number;
+    description?: string;
   };
 
   type ICreateLoginDataParams = {
