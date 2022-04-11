@@ -28,7 +28,9 @@ urlpatterns = [
     path('logindata/<int:pk>/', views.LoginDataViewSet.as_view({'get': 'retrieve', 'put': 'partial_update'})),
 
     # 无参数：get=list all,post=create new
-    path('project', views.ProjectViewSet.as_view({'get': 'list', 'post': 'create'})),
+    path('project', views.ProjectViewSet.as_view({'get': 'list'})),
+    # create_project(create-project)创建一个新的检测项目
+    path('create-project/', views.create_project, name="create-project"),
     # 有参数：get=retrieve one,put=partial_update one,delete=delete one
-    path('project/<int:pk>/', views.ProjectViewSet.as_view({'get': 'retrieve', 'put': 'partial_update', 'delete': 'destroy'})),
+    # path('project/<int:pk>/', views.ProjectViewSet.as_view({'get': 'retrieve', 'put': 'partial_update', 'delete': 'destroy'})),
 ]
