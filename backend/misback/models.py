@@ -1,24 +1,4 @@
-import os
-import uuid
 from django.db import models
-
-
-# Function
-def page_directory_path(instance, filename):
-    ext = filename.split('.').pop()
-    filename = '{0}.{1}'.format(
-        instance.pageIndex,
-        ext
-    )
-
-    return os.path.join(instance.bookId.bookName, filename)  # 系统路径分隔符差异，增强代码重用性
-
-
-def file_path(instance, filename):
-    ext = filename.split('.')[-1]
-    filename = '{}.{}'.format(uuid.uuid4().hex[:10], ext)
-    # return the whole path to the file
-    return os.path.join(instance.userId, "avatar", filename)
 
 
 # Create your models here.
@@ -56,7 +36,7 @@ class Project(models.Model):
 
     pid = models.AutoField(db_column='pid', null=False, primary_key=True, verbose_name='检测项目id')
     projectName = models.CharField(db_column='project_name', max_length=20, default='新项目', null=False, verbose_name='检测项目名称')
-    videoFile = models.CharField(db_column='video_file', max_length=50, null=False, verbose_name="检测项目文件名")
+    videoFile = models.CharField(db_column='video_file', max_length=50, null=False, verbose_name="检测项目文件名，保存路径为/media/<pid>_<projectName>/<videoFile>")
     projectStatus = models.IntegerField(db_column='project_status', null=False, default=0, choices=STATUS_TYPE, verbose_name="检测项目当前状态, 0未启动, 1进行中, 2已完成")
     uid = models.ForeignKey(User, models.CASCADE, db_column='uid', null=False, verbose_name="检测项目所属用户")
     description = models.CharField(db_column='description', max_length=50, null=True, verbose_name='备注')
