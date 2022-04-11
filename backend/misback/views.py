@@ -1,23 +1,13 @@
 # -*- coding:utf-8 -*-
 # Import from standard libs
 import json
-import time
-import datetime
-from operator import itemgetter
-from itertools import groupby
 import traceback
-import jwt
-import os
-import shutil
 import logging
 
 # Import from django libs
 from django.http import JsonResponse
-from django.conf import settings
 from django.utils import timezone
-from django.core import paginator
 from django.forms.models import model_to_dict
-from django.db.models import Count, F
 from django.utils.decorators import method_decorator
 
 # Import from DRF lib
@@ -26,41 +16,19 @@ from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework import viewsets
 
 # Import from customized component
-# from backend.misback import customSerializers, models, filters, paginations
-from misback import customSerializers, models, filters, paginations
+# from backend.misback import customSerializers, models, paginations
+from misback import customSerializers, models, paginations
 from misback.tasks import cvd_detect_task
+
+# Import from utils
+from misback.utils import DateEnconding
+from misback.utils import generate_payload, generate_token, extract_token, handle_uploaded_file, generate_file_path
 
 # Set log file
 logger = logging.getLogger("django")
 
 
 # Create your views here.
-
-# Functions
-# Generate payload, expire in 7 days
-def generate_payload(uid):
-    return {
-        'uid': uid,
-        'expire': (timezone.now() + datetime.timedelta(days=7)).timestamp()
-    }
-
-
-# Generate token
-def generate_token(payload):
-    token = jwt.encode(
-        payload,
-        settings.SECRET_KEY,
-        algorithm="HS256"
-    )
-
-    return token
-
-
-# Transform the datetime when serialize as json
-class DateEnconding(json.JSONEncoder):
-    def default(self, o):
-        if isinstance(o, datetime.datetime.date):
-            return o.strftime('%Y/%m/%d')
 
 
 # Decorations:
@@ -72,11 +40,7 @@ def token_auth(function):
         token = request.META.get("HTTP_TOKEN", None)
         if token:
             try:
-                data = jwt.decode(
-                    token,
-                    settings.SECRET_KEY,
-                    algorithms=['HS256']
-                )
+                data = extract_token(token)
                 if data['expire'] < timezone.now().timestamp():
                     return JsonResponse({"message": "身份认证过期，请重新登陆", "status": 401})
                 return function(request, *args, **kwargs)
@@ -84,7 +48,7 @@ def token_auth(function):
                 logging.error(e.args)
                 logging.error(traceback.format_exc())
                 logging.error('########################################################')
-                return JsonResponse({"message": "检测到可能的恶意攻击，登陆已被拦截", "status": 404})
+                return JsonResponse({"message": "检测到可能的恶意攻击，登陆已被拦截", "status": 404, "errorInfo": traceback.format_exc()})
         else:
             return JsonResponse({"message": "您尚未登录，请先登录", "status": 401})
 
@@ -132,7 +96,7 @@ def log_in(request):
                 logging.error(e.args)
                 logging.error(traceback.format_exc())
                 logging.error('########################################################')
-                return JsonResponse({"message": "数据库错误", "status": 404})
+                return JsonResponse({"message": "数据库错误", "status": 404, "errorInfo": traceback.format_exc()})
         else:
             return JsonResponse({"message": "登录表单填写不完整", "status": 404})
     else:
@@ -149,16 +113,17 @@ def get_now_user(request):
         token = request.META.get("HTTP_TOKEN", None)
         if token:
             try:
-                data = jwt.decode(
-                    token,
-                    settings.SECRET_KEY,
-                    algorithms=['HS256']
-                )
+                data = extract_token(token)
                 if data['uid']:
                     query_user_set = models.User.objects.filter(pk=data['uid'])
                     if not query_user_set.exists():
                         return JsonResponse({"message": "该账号不存在", "status": 404})
                     now_user = query_user_set.first()
+                else:
+                    return JsonResponse({
+                        "message": "用户信息验证失败，token错误",
+                        "status": 404
+                    })
 
                 return JsonResponse({
                     "message": "获取当前账号成功",
@@ -169,7 +134,7 @@ def get_now_user(request):
                 logging.error(e.args)
                 logging.error(traceback.format_exc())
                 logging.error('########################################################')
-                return JsonResponse({"message": "检测到可能的恶意攻击，登陆已被拦截", "status": 404})
+                return JsonResponse({"message": "检测到可能的恶意攻击，登陆已被拦截", "status": 404, "errorInfo": traceback.format_exc()})
         else:
             return JsonResponse({"message": "您尚未登录，请先登录", "status": 401})
     else:
@@ -226,10 +191,64 @@ def sign_up(request):
                 logging.error(e.args)
                 logging.error(traceback.format_exc())
                 logging.error('########################################################')
-
-                return JsonResponse({"message": "数据库出错，注册失败", "status": 200})
+                return JsonResponse({"message": "数据库出错，注册失败", "status": 404, "errorInfo": traceback.format_exc()})
         else:
             return JsonResponse({"message": "注册表单填写不完整", "status": 404})
+    else:
+        return JsonResponse({"message": "请求方式未注册", "status": 404})
+
+
+# 创建Project视图
+# 从参数获取创建Project的必要数据和文件并保存
+# 验证判断其合法性，并创建对应数据存入数据库
+# 创建成功，返回消息和200状态码
+# 创建失败，返回消息和404状态码
+@token_auth
+def create_project(request):
+    if request.method == "POST":
+        # 获取基本参数
+        projectName = request.POST.get('projectName', None)
+        videoFileName = request.POST.get('videoFile', None)
+        projectStatus = request.POST.get('projectStatus', None)
+        description = request.POST.get('description', None)
+        # 获取当前用户信息
+        token = request.META.get("HTTP_TOKEN", None)
+        data = extract_token(token=token)
+        if data['uid']:
+            query_user_set = models.User.objects.filter(pk=data['uid'])
+            if not query_user_set.exists():
+                return JsonResponse({"message": "该账号不存在", "status": 404})
+            now_user = query_user_set.first()
+        if not now_user:
+            return JsonResponse({
+                "message": "用户信息验证失败，token错误",
+                "status": 404
+            })
+        # 获取视频文件
+        videoFile = request.FILES.get('videoFile', None)
+
+        if projectName and videoFileName and projectStatus and description and videoFile:  # 检查数据完整性
+            # 当一切都OK的情况下，创建新Project
+            try:
+                newProjectInfo = models.Project.objects.create(
+                    projectName=projectName,
+                    videoFile=videoFileName,
+                    projectStatus=0,
+                    uid=now_user,
+                    description=description
+                )
+                dirname = "{pid}_{projectName}".format(pid=newProjectInfo.pid, projectName=newProjectInfo.projectName)
+                file_path = generate_file_path(dirname=dirname, filename=newProjectInfo.videoFile)
+                handle_uploaded_file(videoFile, file_path)
+
+                return JsonResponse({"message": "新建项目成功", "status": 200})
+            except Exception as e:
+                logging.error(e.args)
+                logging.error(traceback.format_exc())
+                logging.error('########################################################')
+                return JsonResponse({"message": "数据库出错，创建失败", "status": 404, "errorInfo": traceback.format_exc()})
+        else:
+            return JsonResponse({"message": "表单填写不完整", "status": 404})
     else:
         return JsonResponse({"message": "请求方式未注册", "status": 404})
 
@@ -291,7 +310,7 @@ def run_detect(request):
                 logging.error(e.args)
                 logging.error(traceback.format_exc())
                 logging.error('########################################################')
-                return JsonResponse({"message": "数据库错误", "status": 404})
+                return JsonResponse({"message": "数据库错误", "status": 404, "errorInfo": traceback.format_exc()})
         else:
             return JsonResponse({"message": "表单填写不完整", "status": 404})
     else:
