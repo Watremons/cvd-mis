@@ -46,7 +46,7 @@ class DateEnconding(json.JSONEncoder):
 # Save the file to destination
 def handle_uploaded_file(file, dst):
     dirname = os.path.dirname(dst)
-    if os.path.isdir(dirname):
+    if not os.path.isdir(dirname):
         os.mkdir(dirname)
     with open(dst, 'wb+') as destination:
         for chunk in file.chunks():
@@ -58,4 +58,4 @@ def generate_file_path(dirname, filename):
     # ext = filename.split('.')[-1]
     # filename = '{}.{}'.format(uuid.uuid4().hex[:10], ext)
     # return the whole path to the file
-    return os.path.join(os.path.abspath(), "media", dirname, filename)
+    return os.path.join(os.path.abspath('.'), "media", dirname, filename)
