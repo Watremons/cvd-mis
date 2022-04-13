@@ -206,10 +206,10 @@ def sign_up(request):
 @token_auth
 def create_project(request):
     if request.method == "POST":
+        # print('request', json.dumps(request.POST))
         # 获取基本参数
         projectName = request.POST.get('projectName', None)
-        videoFileName = request.POST.get('videoFile', None)
-        projectStatus = request.POST.get('projectStatus', None)
+        videoFileName = request.POST.get('videoFileName', None)
         description = request.POST.get('description', None)
         # 获取当前用户信息
         token = request.META.get("HTTP_TOKEN", None)
@@ -225,9 +225,10 @@ def create_project(request):
                 "status": 404
             })
         # 获取视频文件
-        videoFile = request.FILES.get('videoFile', None)
+        videoFile = request.FILES.get('videoFile', None);
+        # print('videoFile', type(videoFile), videoFile)
 
-        if projectName and videoFileName and projectStatus and description and videoFile:  # 检查数据完整性
+        if projectName and videoFileName and description and videoFile:  # 检查数据完整性
             # 当一切都OK的情况下，创建新Project
             try:
                 newProjectInfo = models.Project.objects.create(
