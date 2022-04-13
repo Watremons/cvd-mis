@@ -42,12 +42,15 @@ export default function UserCreate(props: IUserCreateProps) {
               message.success('新建用户成功');
               return true;
             } else {
-              message.error('新建用户密码失败');
               await deleteUser({ uid: uid });
+              throw Error(`Create UserLoginData Error: ${createUserLoginRes}`);
             }
+          } else {
+            throw Error(`Create User Error: ${createUserRes}`);
           }
         } catch (error) {
           message.error('创建用户失败，请重试！');
+          console.error(error);
         }
         onCreateFinish();
         return false;
