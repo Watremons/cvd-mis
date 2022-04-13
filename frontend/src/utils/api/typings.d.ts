@@ -63,4 +63,11 @@ declare namespace API {
     uid: number;
     password: string;
   };
+
+  type ICreateProjectParams = {
+    projectName: string;
+    videoFileName: string;
+    description?: string;
+    videoFile?: File;
+  };
 }

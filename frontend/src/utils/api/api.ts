@@ -1,5 +1,5 @@
 import { AxiosResponse } from 'axios';
-import { joinQueryUrl, toFormdata } from '../utils';
+import { joinQueryUrl, toFormdata, toRawFormdata } from '../utils';
 import { request } from './request';
 
 // 登录相关
@@ -47,4 +47,10 @@ export async function updateUser(body: API.IUpdateUserParams): Promise<AxiosResp
 /** REST新增用户登录信息接口 POST /api/misback/logindata */
 export async function createLoginData(body: API.ICreateLoginDataParams): Promise<AxiosResponse<Entity.LoginData>> {
   return request.post('/misback/logindata', toFormdata(body));
+}
+
+// 项目管理
+/** 新增检测项目信息接口 POST /api/misback/create-project/ */
+export async function createProject(body: API.ICreateProjectParams): Promise<AxiosResponse<API.IResult>> {
+  return request.post('/misback/create-project/', toRawFormdata(body), { headers: { 'Content-Type': 'multipart/form-data' } });
 }

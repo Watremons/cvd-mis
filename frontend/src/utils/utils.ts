@@ -10,10 +10,18 @@ export const getToken = () => {
   }
 };
 
-export const toFormdata = (rawData: { [key: string]: string | number }) => {
+export const toFormdata = (rawData: { [key: string]: string | number | File }) => {
   const formdata = new FormData();
   Object.keys(rawData).forEach((key: string) => {
     formdata.append(key, rawData[key].toString());
+  });
+  return formdata;
+};
+
+export const toRawFormdata = (rawData: { [key: string]: string | File }) => {
+  const formdata = new FormData();
+  Object.keys(rawData).forEach((key: string) => {
+    formdata.append(key, rawData[key]);
   });
   return formdata;
 };
