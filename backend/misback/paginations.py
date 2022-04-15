@@ -9,7 +9,7 @@ class MyFormatResultsSetPagination(PageNumberPagination):
     page_size_query_param = "pageSize"
     page_query_param = 'current'
     page_size = 5
-    max_page_size = 100
+    max_page_size = 120
 
     """
     自定义分页方法

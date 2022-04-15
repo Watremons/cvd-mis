@@ -6,6 +6,8 @@ import jwt
 from django.utils import timezone
 from django.conf import settings
 
+from misback.models import Project
+
 
 # Functions
 # Generate payload, expire in 7 days
@@ -59,3 +61,26 @@ def generate_file_path(dirname, filename):
     # filename = '{}.{}'.format(uuid.uuid4().hex[:10], ext)
     # return the whole path to the file
     return os.path.join(os.path.abspath('.'), "media", dirname, filename)
+
+
+# Create media file url
+def get_media_file_url(obj: Project, file_name: str):
+    return "{base_url}{media_url}{pid}_{projectName}/{file_name}".format(
+        base_url=settings.BASE_URL,
+        media_url=settings.MEDIA_URL,
+        pid=obj.pid,
+        projectName=obj.projectName,
+        file_name=file_name
+    )
+
+
+# Read points from points.txt
+def get_point_list(obj: Project):
+    file_path = os.path.join(settings.MEDIA_ROOT, "{pid}_{projectName}".format(pid=obj.pid, projectName=obj.projectName), "points.txt")
+    if not os.path.isfile(file_path):
+        return []
+    fo = open(file_path, "r")
+    raw_point_list = fo.readlines()
+    fo.close()
+    points = [{'x': eval(raw_point)[0], 'y': eval(raw_point)[1]} for raw_point in raw_point_list]
+    return points

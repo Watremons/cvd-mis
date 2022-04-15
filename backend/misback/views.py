@@ -225,7 +225,7 @@ def create_project(request):
                 "status": 404
             })
         # 获取视频文件
-        videoFile = request.FILES.get('videoFile', None);
+        videoFile = request.FILES.get('videoFile', None)
         # print('videoFile', type(videoFile), videoFile)
 
         if projectName and videoFileName and description and videoFile:  # 检查数据完整性
@@ -757,3 +757,11 @@ class LoginDataViewSet(viewsets.ModelViewSet):
 class ProjectViewSet(viewsets.ModelViewSet):
     queryset = models.Project.objects.all()
     serializer_class = customSerializers.ProjectSerializer
+    pagination_class = paginations.MyFormatResultsSetPagination
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    search_fields = ['projectName']
+    # filter_class = filters.UserFilter
+    filterset_fields = ['projectStatus', 'uid']
+    # 默认按uid排序, 可按uid或userProjectNum排序
+    ordering = ['pid']
+    ordering_fields = ['pid']
