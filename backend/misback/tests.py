@@ -48,20 +48,6 @@ def get_sign(data):
 
 if __name__ == "__main__":
     # get_sign("dadadas")
-    SECRET_KEY = 'django-insecure-ugwq(&0%=l3jd=%#)3k!73#03q%4fdyb!1espeb*+6vga#ia*7'
-    token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoxLCJleHBpcmUiOiIyMDIxLzA5LzAyIn0.Edm6LyFV6_ob5R3ix8QoY9vrWq3UyqBfkW6eUVSsKO8"
-    now_user_id = jwt.decode(
-        token,
-        SECRET_KEY,
-        algorithms=['HS256']
-    )['user_id']
-    print(now_user_id)
-
-    expire = jwt.decode(
-        token,
-        SECRET_KEY,
-        algorithms=['HS256']
-    )['expire']
-    print(expire)
-    timestamp = (datetime.datetime.now() + datetime.timedelta(days=7)).timestamp()
-    print()
+    raw_str_list = ["[194,431]\n", "[194,431]\n", "[194,431]\n", "[194,431]\n"]
+    points = [{'x': eval(raw_str)[0], 'y': eval(raw_str)[1]} for raw_str in raw_str_list]
+    print(points)
