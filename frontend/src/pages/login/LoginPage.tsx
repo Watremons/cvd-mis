@@ -45,26 +45,25 @@ export default function LoginPage() {
     try {
       // 登录
       const msg = await login({ userName: values.userName, password: values.password });
+      console.log(msg.data);
       setLoginResult(msg.data);
       if (msg.data.status === 200) {
-        const defaultLoginSuccessMessage = msg.data.message;
-        message.success(defaultLoginSuccessMessage);
-        const { data } = await fetchNowUser();
-        const userInfo = data.data;
-
+        message.success(msg.data.message);
         if (msg.data.token) {
-          if (values.autoLogin) {
-            // 自动登录则保存到localStorage，后端控制时长为7 days
-            localStorage.setItem('token', msg.data.token);
-            localStorage.setItem('userName', userInfo.userName);
-            localStorage.setItem('authority', userInfo.authority.toString());
-          } else {
-            sessionStorage.setItem('token', msg.data.token);
-            sessionStorage.setItem('userName', userInfo.userName);
-            sessionStorage.setItem('authority', userInfo.authority.toString());
+          values.autoLogin ? localStorage.setItem('token', msg.data.token) : sessionStorage.setItem('token', msg.data.token);
+          const { data } = await fetchNowUser();
+          const userInfo = data.data;
+          if (msg.data.token) {
+            if (values.autoLogin) {
+              // 自动登录则保存到localStorage，后端控制时长为7 days
+              localStorage.setItem('userName', userInfo.userName);
+              localStorage.setItem('authority', userInfo.authority.toString());
+            } else {
+              sessionStorage.setItem('userName', userInfo.userName);
+              sessionStorage.setItem('authority', userInfo.authority.toString());
+            }
           }
         }
-
         /** 跳转回初始页 */
         if (!navigate) return;
         navigate('/', { replace: true });
@@ -74,8 +73,8 @@ export default function LoginPage() {
       // 如果失败去设置用户错误信息
       // setUserLoginState(msg);
     } catch (error) {
-      const defaultLoginFailureMessage = '登录失败，请重试！';
-      message.error(defaultLoginFailureMessage);
+      message.error('登录失败，请重试！');
+      console.error('login error:', error);
     }
   };
 

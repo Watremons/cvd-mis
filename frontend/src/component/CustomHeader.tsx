@@ -6,17 +6,26 @@ import logo from '../logo.svg';
 import './CustomHeader.less';
 
 import { logout } from '../utils/api/api';
+import { useNavigate } from 'react-router-dom';
 
 const { Header } = Layout;
 
 export default function CustomHeader() {
+  const navigate = useNavigate();
   const userName = localStorage.getItem('userName');
   function handleMenuClick() {
     logout().then(({ data }) => {
       if (data.status == 200) {
         localStorage.removeItem('token');
         sessionStorage.removeItem('token');
+        localStorage.removeItem('authority');
+        sessionStorage.removeItem('authority');
+        localStorage.removeItem('userName');
+        sessionStorage.removeItem('userName');
         message.success('登出成功!');
+        /** 跳转回初始页 */
+        if (!navigate) return;
+        navigate('/login', { replace: true });
       }
     });
   }
