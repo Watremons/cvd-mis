@@ -18,7 +18,6 @@ class Migration(migrations.Migration):
                 ('uid', models.AutoField(db_column='uid', primary_key=True, serialize=False, verbose_name='用户id')),
                 ('userName', models.CharField(db_column='user_name', default='游客用户', max_length=20, verbose_name='用户名')),
                 ('userDes', models.CharField(db_column='user_des', default='这个人很懒，没有留下简介', max_length=50, verbose_name='用户简介')),
-                ('projectNum', models.IntegerField(db_column='project_num', default=0, verbose_name='用户拥有的检测项目数')),
                 ('createDate', models.DateField(auto_now_add=True, db_column='create_date', verbose_name='用户注册时间')),
                 ('authority', models.IntegerField(choices=[(0, 'Normal User'), (1, 'Admin')], db_column='authority', default=0, verbose_name='用户权限')),
                 ('description', models.CharField(db_column='description', max_length=50, null=True, verbose_name='备注')),
