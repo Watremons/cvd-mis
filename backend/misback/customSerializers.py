@@ -2,7 +2,7 @@ from rest_framework import serializers
 from misback.models import User, LoginData, Project
 from misback import models
 from django.db.models import Q
-from misback.utils import get_media_file_url, get_point_list
+from misback.utils import get_media_file_url, get_point_list, get_media_video_url
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -38,10 +38,10 @@ class ProjectSerializer(serializers.ModelSerializer):
         return get_media_file_url(obj, "raw.jpg")
 
     def get_projectRawVideoUrl(self, obj: Project):
-        return get_media_file_url(obj=obj, file_name=obj.videoFile)
+        return get_media_video_url(file_path='/'.join(["{pid}".format(pid=obj.pid), obj.videoFile]) + '/')
 
     def get_projectResultVideoUrl(self, obj: Project):
-        return get_media_file_url(obj=obj, file_name="{pid}_{projectName}_result.avi".format(pid=obj.pid, projectName=obj.projectName))
+        return get_media_video_url(file_path='/'.join(["{pid}".format(pid=obj.pid), "{pid}_result.mp4".format(pid=obj.pid)]) + '/')
 
     def get_projectResultPointList(self, obj: Project):
         return get_point_list(obj)

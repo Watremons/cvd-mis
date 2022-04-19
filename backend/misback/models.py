@@ -38,6 +38,7 @@ class Project(models.Model):
     projectName = models.CharField(db_column='project_name', max_length=20, default='新项目', null=False, verbose_name='检测项目名称')
     videoFile = models.CharField(db_column='video_file', max_length=50, null=False, verbose_name="检测项目文件名，保存路径为/media/<pid>_<projectName>/<videoFile>")
     projectStatus = models.IntegerField(db_column='project_status', null=False, default=0, choices=STATUS_TYPE, verbose_name="检测项目当前状态, 0未启动, 1进行中, 2已完成")
+    taskId = models.CharField(db_column='task_id', max_length=36, null=True, verbose_name='检测线程taskId')
     uid = models.ForeignKey(User, models.CASCADE, db_column='uid', null=False, verbose_name="检测项目所属用户")
     description = models.CharField(db_column='description', max_length=50, null=True, verbose_name='备注')
 

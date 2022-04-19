@@ -96,7 +96,7 @@ def point2str(point):
     return "[{0},{1}]\n".format(point[0], point[1])
 
 
-def video_vibrate_detect(pid: int, project_name: str, video_file: str, make_pic: int):
+def video_vibrate_detect(pid: int, video_file: str, make_pic: int):
     """
     do video_vibrate_detect
 
@@ -106,10 +106,10 @@ def video_vibrate_detect(pid: int, project_name: str, video_file: str, make_pic:
     """
     yolo = YOLO()
     yolact = YOLACT()
-    print("[Info] '{0}' project detection start!".format(project_name))
+    print("[Info] '<pid:{pid}>' project detection start!".format(pid=pid))
     # 检查目标目录是否存在，并创建
     # 数据文件保存路径
-    out_dir = os.path.join(os.getcwd(), 'media', '{0}_{1}'.format(pid, project_name))
+    out_dir = os.path.join(os.getcwd(), 'media', '{0}'.format(pid))
     if not os.path.isdir(out_dir):
         os.mkdir(out_dir)
     # 调用摄像头，若有参数则改为获取参数指定的视频文件
@@ -120,8 +120,8 @@ def video_vibrate_detect(pid: int, project_name: str, video_file: str, make_pic:
     # print("FPS = {0}".format(capture.get(cv2.CAP_PROP_FPS)))
     # print("Frame Number = {0}".format(capture.get(cv2.CAP_PROP_FRAME_COUNT)))
 
-    fourcc = cv2.VideoWriter_fourcc(*"XVID")
-    out = cv2.VideoWriter(os.path.join(out_dir, '{0}_{1}_result.avi'.format(pid, project_name)), fourcc, 25, (600, 584))
+    fourcc = cv2.VideoWriter_fourcc(*"avc1")
+    out = cv2.VideoWriter(os.path.join(out_dir, '{0}_result.mp4'.format(pid)), fourcc, 25, (600, 584))
 
     fps = 0.0
     points = []
@@ -176,7 +176,7 @@ def video_vibrate_detect(pid: int, project_name: str, video_file: str, make_pic:
 
         out.write(frame)
         if make_pic == 1:
-            cv2.imshow('{0}_{1}'.format(pid, project_name), frame)
+            cv2.imshow('<pid:{0}>'.format(pid), frame)
             cv2.imwrite(os.path.join(out_dir, "{:05d}.jpg".format(frame_count)), frame)
         frame_count += 1
 
@@ -191,7 +191,7 @@ def video_vibrate_detect(pid: int, project_name: str, video_file: str, make_pic:
     fo = open(os.path.join(out_dir, 'points.txt'), "w")
     fo.writelines(map(point2str, points))
     fo.close()
-    print("[Info] {0} Finished!".format(project_name))
+    print("[Info] <pid:{0}> Finished!".format(pid))
     return frame_count, len(points)
 
 
@@ -200,4 +200,4 @@ if __name__ == '__main__':
     # sys.argv = [project_name: str, video_path: str, make_pic: int]
     # video_vibrate_detect(eval(sys.argv[1]), eval(sys.argv[2]), eval(sys.argv[3]))
     # print(rateModel(torch.from_numpy(np.array([57.2]))))
-    video_vibrate_detect(pid=1, project_name='test', video_file='test.mp4', make_pic=1)
+    video_vibrate_detect(pid=1, video_file='test.mp4', make_pic=1)
