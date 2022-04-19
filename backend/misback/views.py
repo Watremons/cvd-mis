@@ -1,11 +1,14 @@
 # -*- coding:utf-8 -*-
 # Import from standard libs
 import json
+import mimetypes
+import re
 import traceback
 import logging
+from wsgiref.util import FileWrapper
 
 # Import from django libs
-from django.http import JsonResponse
+from django.http import JsonResponse, StreamingHttpResponse
 from django.utils import timezone
 from django.forms.models import model_to_dict
 from django.utils.decorators import method_decorator
@@ -22,7 +25,8 @@ from misback.tasks import cvd_detect_task
 
 # Import from utils
 from misback.utils import DateEnconding
-from misback.utils import generate_payload, generate_token, extract_token, handle_uploaded_file, generate_file_path
+from misback.utils import generate_payload, generate_token, extract_token
+from misback.utils import combine_media_file_path, generate_file_name, handle_uploaded_file, delete_media_dir, get_file_size, file_iterator
 
 # Set log file
 logger = logging.getLogger("django")
@@ -107,9 +111,8 @@ def log_in(request):
 # Params: /
 # Return 404 if no token
 # Return 200 if success
-@token_auth
 def get_now_user(request):
-    if request.method == "POST":
+    if request.method == "GET":
         token = request.META.get("HTTP_TOKEN", None)
         if token:
             try:
@@ -209,7 +212,7 @@ def create_project(request):
         # print('request', json.dumps(request.POST))
         # 获取基本参数
         projectName = request.POST.get('projectName', None)
-        videoFileName = request.POST.get('videoFileName', None)
+        rawVideoFileName = request.POST.get('videoFileName', None)
         description = request.POST.get('description', None)
         # 获取当前用户信息
         token = request.META.get("HTTP_TOKEN", None)
@@ -227,6 +230,7 @@ def create_project(request):
         # 获取视频文件
         videoFile = request.FILES.get('videoFile', None)
         # print('videoFile', type(videoFile), videoFile)
+        videoFileName = generate_file_name(filename=rawVideoFileName)
 
         if projectName and videoFileName and description and videoFile:  # 检查数据完整性
             # 当一切都OK的情况下，创建新Project
@@ -238,8 +242,8 @@ def create_project(request):
                     uid=now_user,
                     description=description
                 )
-                dirname = "{pid}_{projectName}".format(pid=newProjectInfo.pid, projectName=newProjectInfo.projectName)
-                file_path = generate_file_path(dirname=dirname, filename=newProjectInfo.videoFile)
+                dirname = "{pid}".format(pid=newProjectInfo.pid)
+                file_path = combine_media_file_path(dirname=dirname, filename=newProjectInfo.videoFile)
                 handle_uploaded_file(videoFile, file_path)
 
                 return JsonResponse({"message": "新建项目成功", "status": 200})
@@ -258,53 +262,37 @@ def create_project(request):
 # Params: pid
 # Return 404 if no pid, no pageNum
 # Return 200 if success
-# @token_auth
+@token_auth
 def run_detect(request):
     if request.method == "POST":
-        # 从参数获取bookId和pageNum
+        # 从参数获取pid
         pid = request.POST.get('pid', None)
         if pid:
             try:
-                # query_project_set = models.Project.objects.filter(pid=pid)
-                # if not query_project_set.exists():
-                #     return JsonResponse({"message": "检测项目pid错误", "status": 404})
+                query_project_set = models.Project.objects.filter(pid=pid)
+                if not query_project_set.exists():
+                    return JsonResponse({"message": "检测项目pid错误", "status": 404})
+                # Change the status
+                query_project_set.update(projectStatus=1)
 
-                # # Change the status
-                # query_project_set.update(projectStatus=1)
-
-                # query_project = query_project_set.first()
-
-                # project_run_result = SendParamsToCmd(
-                #     pid=pid
-                #     project_name=query_project.projectName,
-                #     video_file=query_project.videoFile,
-                #     make_pic=0,
-                # ).decode()
-                # print(project_run_result)
-
+                query_project = query_project_set.first()
                 project_run_celery = cvd_detect_task.delay(
-                    pid=pid
+                    pid=query_project.pid,
+                    video_file=query_project.videoFile,
+                    make_pic=0
                 )
-                logging.debug('task_id', project_run_celery.task_id)
+                logging.info(f'Run detect to project {pid}')
+                logging.info(f'task_id: {project_run_celery.task_id}')
 
-                # page_dict = {
-                #     "pageId": query_page.pageId,
-                #     "pageIndex": query_page.pageIndex,
-                #     "pagePhotoUrl": query_page.pagePhotoUrl,
-                #     "bookId": query_page.bookId.bookId,
-                #     "pageContent": query_page.pageContent
-                # }
+                # Change the status to doing(1)
+                target_project = models.Project.objects.filter(pid=pid)
+                if not target_project.exists():
+                    return JsonResponse({"message": f"不存在project实体pid为{pid}", "status": 404})
+                target_project.update(taskId=project_run_celery.task_id)
 
-                # boxList = []
-                # for box in query_boxes:
-                #     box_dict = model_to_dict(box)
-                #     boxList.append(box_dict)
-                # page_dict["boxList"] = boxList
                 return JsonResponse({
                     'status': 200,
-                    'message': {
-                        'task_id':  project_run_celery.task_id
-                    }
+                    'message': '成功启动检测，请重新查看project以获取task_id',
                 })
 
             except Exception as e:
@@ -317,6 +305,47 @@ def run_detect(request):
     else:
         return JsonResponse({"message": "请求方式未注册", "status": 404})
 
+
+# run_detect(run-detect)创建一个新的检测项目
+# Params: pid
+# Return 404 if no pid, no pageNum
+# Return 200 if success
+def get_video(request, pk, filename):
+    if request.method == "GET":
+        if pk and filename:
+            try:
+                range_header = request.META.get('HTTP_RANGE', '').strip()
+                range_re = re.compile(r'bytes\s*=\s*(\d+)\s*-\s*(\d*)', re.I)
+                range_match = range_re.match(range_header)
+                whole_file_path = combine_media_file_path(dirname=str(pk), filename=filename)
+
+                size = get_file_size(whole_file_path)
+                content_type, encoding = mimetypes.guess_type(whole_file_path)
+                content_type = 'application/octet-stream'
+                if range_match:
+                    first_byte, last_byte = range_match.groups()
+                    first_byte = int(first_byte) if first_byte else 0
+                    last_byte = first_byte + 1024 * 1024 * 10
+                    if last_byte >= size:
+                        last_byte = size - 1
+                    length = last_byte - first_byte + 1
+                    response = StreamingHttpResponse(file_iterator(whole_file_path, offset=first_byte, length=length), status=206, content_type=content_type)
+                    response['Content-Length'] = str(length)
+                    response['Content-Range'] = 'bytes %s-%s/%s' % (first_byte, last_byte, size)
+                else:
+                    response = StreamingHttpResponse(FileWrapper(open(whole_file_path, 'rb')), content_type=content_type)
+                    response['Content-Length'] = str(size)
+                response['Accept-Ranges'] = 'bytes'
+                return response
+            except Exception as e:
+                logging.error(e.args)
+                logging.error(traceback.format_exc())
+                logging.error('########################################################')
+                return JsonResponse({"message": "数据库错误", "status": 404, "errorInfo": traceback.format_exc()})
+        else:
+            return JsonResponse({"message": "表单填写不完整", "status": 404})
+    else:
+        return JsonResponse({"message": "请求方式未注册", "status": 404})
 
 # # create_project(create-project)创建一个新的检测项目
 # # Params: bookId, pageNum
@@ -765,3 +794,12 @@ class ProjectViewSet(viewsets.ModelViewSet):
     # 默认按uid排序, 可按uid或userProjectNum排序
     ordering = ['pid']
     ordering_fields = ['pid']
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance:
+            dir_name = "{pid}".format(pid=instance.pid)
+            result = delete_media_dir(dir_name=dir_name)
+            logging.info("Delete files with project", dir_name, ":")
+            logging.info(result)
+        return super(ProjectViewSet, self).destroy(request, *args, **kwargs)

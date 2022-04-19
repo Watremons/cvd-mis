@@ -11,9 +11,10 @@ urlpatterns = [
     path('logout/', views.log_out, name='logout'),
     # get_now_user(now-user)获取当前登录的用户信息
     path('now-user/', views.get_now_user, name='now-user'),
-
-    # 运行检测模型
+    # run_detect(run-detect)运行检测模型
     path('run-detect/', views.run_detect, name='run-detect'),
+    # get_video(get-video)运行检测模型
+    path('get-video/<int:pk>/<str:filename>/', views.get_video, name='get-video'),
 
     # 以下为对任意模型的增删改查
 
@@ -23,7 +24,7 @@ urlpatterns = [
     path('user/<int:pk>/', views.UserViewSet.as_view({'get': 'retrieve', 'put': 'partial_update', 'delete': 'destroy'})),
 
     # 无参数：get=list all,post=create new
-    path('logindata', views.LoginDataViewSet.as_view({'post': 'create'})),
+    path('logindata/', views.LoginDataViewSet.as_view({'post': 'create'})),
     # 有参数：get=retrieve one,put=partial_update one,delete=delete one
     path('logindata/<int:pk>/', views.LoginDataViewSet.as_view({'get': 'retrieve', 'put': 'partial_update'})),
 
@@ -32,5 +33,5 @@ urlpatterns = [
     # create_project(create-project)创建一个新的检测项目
     path('create-project/', views.create_project, name="create-project"),
     # 有参数：get=retrieve one,put=partial_update one,delete=delete one
-    # path('project/<int:pk>/', views.ProjectViewSet.as_view({'get': 'retrieve', 'put': 'partial_update', 'delete': 'destroy'})),
+    path('project/<int:pk>/', views.ProjectViewSet.as_view({'get': 'retrieve', 'put': 'partial_update', 'delete': 'destroy'})),
 ]
