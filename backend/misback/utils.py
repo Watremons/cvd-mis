@@ -1,3 +1,4 @@
+from collections import Counter
 import datetime
 import json
 import os
@@ -98,8 +99,9 @@ def get_point_list(obj: Project):
     fo = open(file_path, "r")
     raw_point_list = fo.readlines()
     fo.close()
-    points = [{'x': eval(raw_point)[0], 'y': eval(raw_point)[1]} for raw_point in raw_point_list]
-    return points
+    points = [(eval(raw_point)[0], eval(raw_point)[1]) for raw_point in raw_point_list]
+    point_count = Counter(points)
+    return [{'x': item[0][0], 'y': item[0][1], 'value': item[1]} for item in point_count.items()]
 
 
 # Detele dir and files
