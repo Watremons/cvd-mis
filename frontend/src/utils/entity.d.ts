@@ -25,12 +25,24 @@ declare namespace Entity {
   //   done = 2
   // }
 
+  class Point {
+    x: number;
+    y: number;
+    value: number;
+  }
+
   class Project {
     pid: number;
     projectName: string;
     videoFile: string;
     projectStatus: number;
     uid: number;
-    description: string;
+    taskId?: string;
+    description?: string;
+    projectHeatmapUrl?: string;
+    projectThumbUrl?: string;
+    projectRawVideoUrl?: string;
+    projectResultVideoUrl?: string;
+    projectResultPointList?: Point[];
   }
 }
