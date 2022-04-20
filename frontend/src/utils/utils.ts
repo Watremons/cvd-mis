@@ -39,11 +39,11 @@ export const joinQueryUrl = (baseUrl: string, body: { [key: string]: string | nu
   return queryUrl;
 };
 
-export const joinOrderValue = (sorter: SorterResult<Entity.User> | SorterResult<Entity.User>[]) => {
-  let sorterList: SorterResult<Entity.User>[] = [];
+export const joinOrderValue = <T>(sorter: SorterResult<T> | SorterResult<T>[]) => {
+  let sorterList: SorterResult<T>[] = [];
   sorterList = sorterList.concat(sorter);
   const orderValue: string[] = [];
-  sorterList.forEach((element: SorterResult<Entity.User>) => {
+  sorterList.forEach((element: SorterResult<T>) => {
     if (element?.columnKey && element?.order) {
       if (element?.order === 'ascend') {
         orderValue.push(element.columnKey.toString());
