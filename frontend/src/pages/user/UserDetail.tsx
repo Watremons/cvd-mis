@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Drawer, Divider, message, Empty, Descriptions, Button } from 'antd';
+import { Drawer, Divider, message, Empty, Descriptions } from 'antd';
 
 import { fetchUser } from '../../utils/api/api';
 import { defaultUser } from './constant';
