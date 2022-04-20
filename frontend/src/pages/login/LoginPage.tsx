@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 
 import logo from '../../logo.svg';
 import './LoginPage.less';
-import CustomFooter from '../../component/CustomFooter';
+import CustomFooter from '../../component/layout/CustomFooter';
 
 import { fetchNowUser, login } from '../../utils/api/api';
 import { getToken } from '../../utils/utils';
