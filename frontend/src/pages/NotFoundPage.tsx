@@ -1,12 +1,18 @@
+import { Button, Result } from 'antd';
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 export default function NotFoundPage() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <h1>404 Not Found</h1>
-        <p>You visit an unexisted page.</p>
-      </header>
-    </div>
+    <Result
+      status="404"
+      title="404 Not Found"
+      subTitle="访问了不存在的页面"
+      extra={
+        <Link to="/dashboard" replace={true}>
+          <Button type="primary">回到首页</Button>
+        </Link>
+      }
+    />
   );
 }
