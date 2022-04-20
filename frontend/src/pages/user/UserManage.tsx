@@ -8,7 +8,7 @@ import { FilterConfirmProps, FilterDropdownProps, FilterValue, SorterResult } fr
 
 import AuthorityTag from '../../component/AuthorityTag';
 import { deleteUser, fetchUsers } from '../../utils/api/api';
-import { defaultPagination } from './constant';
+import { authorityEnum, defaultPagination } from './constant';
 import { joinFilterValue, joinOrderValue } from '../../utils/utils';
 import UserCreate from './UserCreate';
 import UserEdit from './UserEdit';
@@ -130,16 +130,7 @@ export default function UserManage() {
       dataIndex: 'authority',
       key: 'authority',
       render: authority => <AuthorityTag authority={authority} />,
-      filters: [
-        {
-          text: '管理员',
-          value: 1
-        },
-        {
-          text: '普通用户',
-          value: 0
-        }
-      ]
+      filters: authorityEnum
     },
     {
       title: '操作',
@@ -184,8 +175,6 @@ export default function UserManage() {
     }
   ];
 
-  useEffect(() => handleTableChange({}, {}, {}), []);
-
   const handleTableChange = (
     pagination: TablePaginationConfig,
     filters: Record<string, FilterValue | null>,
@@ -219,6 +208,8 @@ export default function UserManage() {
   };
 
   const refreshTable = () => handleTableChange({}, {}, {});
+
+  useEffect(() => refreshTable(), []);
 
   return (
     <Row>

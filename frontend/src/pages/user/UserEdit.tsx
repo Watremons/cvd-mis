@@ -5,6 +5,7 @@ import { EditOutlined } from '@ant-design/icons';
 
 import AuthorityTag from '../../component/AuthorityTag';
 import { updateUser } from '../../utils/api/api';
+import { authorityEnum } from './constant';
 
 interface IUserEditProps {
   initRecord: Entity.User;
@@ -58,16 +59,7 @@ export default function UserEdit(props: IUserEditProps) {
         />
         <ProFormSelect
           width="xs"
-          options={[
-            {
-              label: '管理员',
-              value: 1
-            },
-            {
-              label: '普通用户',
-              value: 0
-            }
-          ]}
+          options={authorityEnum}
           name="authority"
           label="用户权限"
           initialValue={initRecord.authority}

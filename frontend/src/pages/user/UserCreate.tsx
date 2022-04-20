@@ -4,6 +4,7 @@ import ProForm, { ModalForm, ProFormSelect, ProFormText, ProFormTextArea } from 
 import { PlusOutlined } from '@ant-design/icons';
 import { createLoginData, createUser, deleteUser } from '../../utils/api/api';
 import AuthorityTag from '../../component/AuthorityTag';
+import { authorityEnum } from './constant';
 
 interface IUserCreateProps {
   onCreateFinish: () => void;
@@ -71,16 +72,7 @@ export default function UserCreate(props: IUserCreateProps) {
         />
         <ProFormSelect
           width="xs"
-          options={[
-            {
-              label: '管理员',
-              value: 1
-            },
-            {
-              label: '普通用户',
-              value: 0
-            }
-          ]}
+          options={authorityEnum}
           name="authority"
           label="用户权限"
           fieldProps={{

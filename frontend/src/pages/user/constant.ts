@@ -19,3 +19,16 @@ export const defaultUser: Entity.User = {
   userProjectNum: 0,
   description: undefined
 };
+
+export const authorityEnum = [
+  {
+    text: '管理员',
+    label: '管理员',
+    value: 1
+  },
+  {
+    text: '普通用户',
+    label: '普通用户',
+    value: 0
+  }
+];

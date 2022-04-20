@@ -39,7 +39,7 @@ export default function UserDetail(props: IUserDetailProps) {
         <Empty />
       ) : (
         <>
-          <Descriptions title={`用户信息<uid: ${uid}>`} column={2} extra={<Button>Edit</Button>}>
+          <Descriptions title={`用户信息<uid: ${uid}>`} column={2}>
             <Descriptions.Item label="用户名">{showUser.userName}</Descriptions.Item>
             <Descriptions.Item label="用户权限">
               <AuthorityTag authority={showUser.authority} />
