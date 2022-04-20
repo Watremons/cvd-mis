@@ -2,10 +2,10 @@ import React from 'react';
 import { Route, Routes } from 'react-router';
 
 import CustomLayout from './CustomLayout';
-import DashboardPage from '../pages/dashboard/DashboardPage';
-import UserRoutes from '../pages/user/UserRoutes';
-import ProjectRoutes from '../pages/project/ProjectRoutes';
-import NotFoundPage from '../pages/NotFoundPage';
+import DashboardPage from '../../pages/dashboard/DashboardPage';
+import UserRoutes from '../../pages/user/UserRoutes';
+import ProjectRoutes from '../../pages/project/ProjectRoutes';
+import NotFoundPage from '../../pages/NotFoundPage';
 
 export default function Dispatcher() {
   return (

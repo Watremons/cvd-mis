@@ -2,10 +2,10 @@ import React from 'react';
 import { Dropdown, Layout, Menu, message } from 'antd';
 import { LogoutOutlined } from '@ant-design/icons';
 
-import logo from '../logo.svg';
+import logo from '../../logo.svg';
 import './CustomHeader.less';
 
-import { logout } from '../utils/api/api';
+import { logout } from '../../utils/api/api';
 import { useNavigate } from 'react-router-dom';
 
 const { Header } = Layout;
