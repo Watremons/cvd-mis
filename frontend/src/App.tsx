@@ -1,10 +1,10 @@
 import React from 'react';
 import { HashRouter, Route, Routes } from 'react-router-dom';
 
-import Dispatcher from './component/Dispatcher';
+import Dispatcher from './component/layout/Dispatcher';
 import LoginPage from './pages/login/LoginPage';
 import RootPage from './pages/RootPage';
-import Authentication from './component/Authentication';
+import Authentication from './component/layout/Authentication';
 
 function App() {
   return (
