@@ -1,7 +1,18 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const CracoLessPlugin = require('craco-less');
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 
 module.exports = {
+  webpack: {
+    plugins: [
+      new BundleAnalyzerPlugin({
+        analyzerMode: 'server',
+        analyzerHost: '127.0.0.1',
+        analyzerPort: 8888,
+        openAnalyzer: true
+      })
+    ]
+  },
   plugins: [
     {
       plugin: CracoLessPlugin,
@@ -36,7 +47,24 @@ module.exports = {
           libraryName: 'antd',
           libraryDirectory: 'es',
           style: true
-        }
+        },
+        'antd'
+      ],
+      [
+        'import',
+        {
+          libraryName: '@ant-design/charts',
+          libraryDirectory: 'es'
+        },
+        '@ant-design/charts'
+      ],
+      [
+        'import',
+        {
+          libraryName: '@antv',
+          libraryDirectory: 'es'
+        },
+        '@antv'
       ]
     ]
   }
