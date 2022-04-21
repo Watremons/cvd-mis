@@ -30,6 +30,7 @@ class ProjectSerializer(serializers.ModelSerializer):
     projectRawVideoUrl = serializers.SerializerMethodField()
     projectResultVideoUrl = serializers.SerializerMethodField()
     projectResultPointList = serializers.SerializerMethodField()
+    projectUserName = serializers.SerializerMethodField()
 
     def get_projectHeatmapUrl(self, obj: Project):
         return get_media_file_url(obj, "heatmap.jpg")
@@ -45,6 +46,9 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     def get_projectResultPointList(self, obj: Project):
         return get_point_list(obj)
+
+    def get_projectUserName(self, obj: Project):
+        return obj.uid.userName
 
     class Meta:
         model = Project
