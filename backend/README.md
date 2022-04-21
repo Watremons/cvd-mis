@@ -9,8 +9,10 @@
 启动方式
 
 ```bash
-# 后端服务器
+# 后端服务器（原生轻量级wsgi服务器）
 python manage.py runserver
+# 后端服务器（asgi服务器daphne，用于支持eventstream）
+daphne backend.asgi:application
 
 # celery职程
 celery -A backend worker -l info -P eventlet -c 1000
@@ -124,14 +126,16 @@ conda install pymysql
 conda install -c conda-forge djangorestframework
 conda install -c conda-forge django-cors-headers
 conda install -c conda-forge coreapi
-markdown
 conda install -c conda-forge django-filter
+conda install -c conda-forge daphne
+conda install -c conda-forge channels
 
 pip install pycocotools
 pip install pyheatmap
+pip install celery
+pip install eventlet
+pip install django-eventstream
 ```
-
-
 
 ## 2.数据库设计
 
