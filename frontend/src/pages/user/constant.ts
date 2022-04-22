@@ -20,7 +20,7 @@ export const defaultUser: Entity.User = {
   description: undefined
 };
 
-export const authorityEnum = [
+export const authorityEnum: Constant.OptionElement[] = [
   {
     text: '管理员',
     label: '管理员',

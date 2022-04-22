@@ -20,7 +20,7 @@ export const defaultProject: Entity.Project = {
   description: undefined
 };
 
-export const projectStatusEnum = [
+export const projectStatusEnum: Constant.OptionElement[] = [
   {
     text: '已完成',
     label: '已完成',
