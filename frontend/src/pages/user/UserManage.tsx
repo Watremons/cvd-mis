@@ -130,7 +130,8 @@ export default function UserManage() {
       dataIndex: 'authority',
       key: 'authority',
       render: authority => <AuthorityTag authority={authority} />,
-      filters: authorityEnum
+      filters: authorityEnum,
+      filterMultiple: false
     },
     {
       title: '操作',
