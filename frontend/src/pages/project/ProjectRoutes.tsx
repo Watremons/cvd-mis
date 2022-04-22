@@ -1,6 +1,6 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import NotFoundPage from '../NotFoundPage';
+import NotFoundPage from '../error/NotFoundPage';
 import ProjectCreate from './ProjectCreate';
 import ProjectManage from './ProjectManage';
 

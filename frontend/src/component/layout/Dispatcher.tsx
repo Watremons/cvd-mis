@@ -5,7 +5,7 @@ import CustomLayout from './CustomLayout';
 import DashboardPage from '../../pages/dashboard/DashboardPage';
 import UserRoutes from '../../pages/user/UserRoutes';
 import ProjectRoutes from '../../pages/project/ProjectRoutes';
-import NotFoundPage from '../../pages/NotFoundPage';
+import NotFoundPage from '../../pages/error/NotFoundPage';
 
 export default function Dispatcher() {
   return (

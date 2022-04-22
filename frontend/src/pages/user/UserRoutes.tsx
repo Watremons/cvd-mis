@@ -1,6 +1,6 @@
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
-import NotFoundPage from '../NotFoundPage';
+import NotFoundPage from '../error/NotFoundPage';
 import UserManage from './UserManage';
 import UserSetting from './UserSetting';
 
