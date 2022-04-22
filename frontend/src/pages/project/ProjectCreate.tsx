@@ -1,18 +1,12 @@
-import React, { useState } from 'react';
-import ProForm, { ProFormText, ProFormTextArea, ProFormUploadDragger } from '@ant-design/pro-form';
+import React, { useRef, useState } from 'react';
+import ProForm, { ProFormInstance, ProFormText, ProFormTextArea, ProFormUploadDragger } from '@ant-design/pro-form';
 import { Card, Col, message, Row } from 'antd';
 import { createProject } from '../../utils/api/api';
 import { UploadFile } from 'antd/es/upload/interface';
 
 export default function ProjectCreate() {
+  const formRef = useRef<ProFormInstance>();
   const [loading, setLoading] = useState<boolean>(false);
-  // const [uploadFile, setUploadFile] = useState<RcFile | null>(null);
-
-  // const handleUpload = (event: ChangeEvent<HTMLInputElement>) => {
-  //   event.preventDefault();
-  //   const files = event.target.files ?? [];
-  //   console.log(files);
-  // };
 
   return (
     <Row>
@@ -23,9 +17,11 @@ export default function ProjectCreate() {
             videoFileList: UploadFile[];
             description?: string;
           }>
+            formRef={formRef}
             encType="multipart/form-data"
             onFinish={async values => {
               console.log('form values', values);
+              setLoading(true);
               try {
                 const videoFile = values.videoFileList.shift();
                 const videoFileName = videoFile?.name;
@@ -42,6 +38,8 @@ export default function ProjectCreate() {
                 });
                 if (createProjectRes.data.status === 200) {
                   message.success('新建检测项目成功！');
+                  setLoading(false);
+                  formRef.current?.resetFields(); // 重置表单项
                   return true;
                 } else {
                   throw Error(`Create Project Error:${createProjectRes}`);
@@ -50,6 +48,7 @@ export default function ProjectCreate() {
                 message.error('新建检测项目失败，详情请查看console');
                 console.error(error);
               }
+              setLoading(false);
               return false;
             }}
             autoFocusFirstInput
@@ -85,7 +84,6 @@ export default function ProjectCreate() {
                 rules={[{ required: true, message: '需要上传一个待检测视频文件' }]}
               />
             </ProForm.Group>
-            {/* <input type="file" onChange={handleUpload}></input> */}
             <ProForm.Group>
               <ProFormTextArea
                 disabled={loading}
