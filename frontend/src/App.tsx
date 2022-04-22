@@ -4,7 +4,7 @@ import { HashRouter, Route, Routes } from 'react-router-dom';
 import Dispatcher from './component/layout/Dispatcher';
 import LoginPage from './pages/login/LoginPage';
 import RootPage from './pages/RootPage';
-import Authentication from './component/layout/Authentication';
+import LoginAuth from './component/auth/LoginAuth';
 
 function App() {
   return (
@@ -15,9 +15,9 @@ function App() {
         <Route
           path="*"
           element={
-            <Authentication>
+            <LoginAuth>
               <Dispatcher />
-            </Authentication>
+            </LoginAuth>
           }
         />
       </Routes>

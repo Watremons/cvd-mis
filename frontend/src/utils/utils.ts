@@ -10,6 +10,16 @@ export const getToken = () => {
   }
 };
 
+export const getAuthority = () => {
+  const authority = localStorage.getItem('authority') || sessionStorage.getItem('authority');
+  // console.log('token', token);
+  if (authority) {
+    return Number.parseInt(authority, 10);
+  } else {
+    return false;
+  }
+};
+
 export const toFormdata = (rawData: { [key: string]: string | number | File }) => {
   const formdata = new FormData();
   Object.keys(rawData).forEach((key: string) => {
