@@ -13,9 +13,10 @@ from misback.models import Project
 
 # Functions
 # Generate payload, expire in 7 days
-def generate_payload(uid):
+def generate_payload(uid, authority):
     return {
         'uid': uid,
+        'authority': authority,
         'expire': (timezone.now() + datetime.timedelta(days=7)).timestamp()
     }
 

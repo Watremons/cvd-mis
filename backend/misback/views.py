@@ -56,7 +56,6 @@ def token_auth(function):
                 return JsonResponse({"message": "检测到可能的恶意攻击，登陆已被拦截", "status": 404, "errorInfo": traceback.format_exc()})
         else:
             return JsonResponse({"message": "您尚未登录，请先登录", "status": 401})
-
     return authenticate
 
 
@@ -83,7 +82,7 @@ def log_in(request):
                 # 判断是否和存储密码相同
                 if (log_in_user.logindata.password == password):
                     # 若相同，设置登录状态为True，设置登录id为userId
-                    payload = generate_payload(log_in_user.uid)
+                    payload = generate_payload(log_in_user.uid, log_in_user.authority)
                     token = generate_token(payload)
                     # logging.debug(request.session.get('userId', None))
                     response = JsonResponse({
@@ -830,6 +829,18 @@ class ProjectViewSet(viewsets.ModelViewSet):
     # 默认按uid排序, 可按uid或userProjectNum排序
     ordering = ['pid']
     ordering_fields = ['pid']
+
+    # 重写用于get all的list函数，使其判断权限后在request上增加指定uid过滤
+    def list(self, request, *args, **kwargs):
+        token = request.META.get("HTTP_TOKEN", None)
+        token_data = extract_token(token)
+        uid = token_data['uid']
+        authority = token_data['authority']
+        request.GET._mutable = True
+        if authority != 1:
+            request.query_params['uid'] = uid
+        # print(request.query_params['uid'])
+        return super(ProjectViewSet, self).list(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
