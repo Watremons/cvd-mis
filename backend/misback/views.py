@@ -6,6 +6,7 @@ import re
 import traceback
 import logging
 from wsgiref.util import FileWrapper
+from celery.result import AsyncResult
 
 # Import from django libs
 from django.http import JsonResponse, StreamingHttpResponse
@@ -306,8 +307,43 @@ def run_detect(request):
         return JsonResponse({"message": "请求方式未注册", "status": 404})
 
 
-# run_detect(run-detect)创建一个新的检测项目
-# Params: pid
+# async_result(async-result)通过处理task_id获取结果
+# Params: taskId
+# Return 404 if no taskId
+# Return 200 if success
+@token_auth
+def async_result(request, taskId):
+    if request.method == "GET":
+        if taskId:
+            try:
+                task_result = AsyncResult(id=taskId)
+                print('task_result', task_result)
+
+                return JsonResponse({
+                    'status': 200,
+                    'message': '成功获取task_result',
+                    'data': {
+                        'status': task_result.status,
+                        'result': task_result.result,
+                        'successful': task_result.successful(),
+                        'traceback': task_result.traceback,
+                        'failed': task_result.failed()
+                    }
+                })
+
+            except Exception as e:
+                logging.error(e.args)
+                logging.error(traceback.format_exc())
+                logging.error('########################################################')
+                return JsonResponse({"message": "数据库错误", "status": 404, "errorInfo": traceback.format_exc()})
+        else:
+            return JsonResponse({"message": "表单填写不完整", "status": 404})
+    else:
+        return JsonResponse({"message": "请求方式未注册", "status": 404})
+
+
+# get_video(get-video)以视频流的形式返回视频文件
+# Params: pk, filename
 # Return 404 if no pid, no pageNum
 # Return 200 if success
 def get_video(request, pk, filename):

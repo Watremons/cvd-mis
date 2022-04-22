@@ -13,8 +13,10 @@ urlpatterns = [
     path('now-user/', views.get_now_user, name='now-user'),
     # run_detect(run-detect)运行检测模型
     path('run-detect/', views.run_detect, name='run-detect'),
-    # get_video(get-video)运行检测模型
+    # get_video(get-video)获取视频流
     path('get-video/<int:pk>/<str:filename>/', views.get_video, name='get-video'),
+    # async_result(async-result)获取检测模型运行状态
+    path('async-result/<str:taskId>/', views.async_result, name='async-result'),
 
     # 以下为对任意模型的增删改查
 
