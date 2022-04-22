@@ -1,6 +1,7 @@
-import { DotChartOutlined } from '@ant-design/icons';
-import { Button, Empty } from 'antd';
 import React, { useState } from 'react';
+
+import { Button, Empty } from 'antd';
+import { DotChartOutlined } from '@ant-design/icons';
 import HeatmapModal from '../../component/HeatmapModal';
 
 interface IProjectHeatmapProps {

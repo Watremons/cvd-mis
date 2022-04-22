@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Heatmap, HeatmapConfig } from '@ant-design/plots';
+import { Heatmap } from '@ant-design/plots';
 import { Button, Modal } from 'antd';
 import { Datum } from '@antv/g2plot';
 
