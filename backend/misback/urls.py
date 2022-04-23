@@ -11,6 +11,8 @@ urlpatterns = [
     path('logout/', views.log_out, name='logout'),
     # get_now_user(now-user)获取当前登录的用户信息
     path('now-user/', views.get_now_user, name='now-user'),
+    # user_basic(user-basic)获取所有用户基础信息
+    path('user-basic/', views.user_basic, name='user-basic'),
     # run_detect(run-detect)运行检测模型
     path('run-detect/', views.run_detect, name='run-detect'),
     # get_video(get-video)获取视频流
