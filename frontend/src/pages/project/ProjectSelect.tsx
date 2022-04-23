@@ -7,17 +7,20 @@ interface IProjectSelectProps {
   selectedOptionList: number[];
   setSelectedOptionList: (newList: number[]) => void;
   options: { label: ReactNode; value: string | number }[];
+  style?: React.CSSProperties;
+  loading?: boolean;
 }
 
 export default function ProjectSelect(props: IProjectSelectProps) {
-  const { maxTagCount, placeholder, selectedOptionList, setSelectedOptionList, options } = props;
+  const { maxTagCount, placeholder, selectedOptionList, setSelectedOptionList, options, style, loading } = props;
   return (
     <Select
+      loading={loading ?? false}
       showArrow
       allowClear
       placeholder={placeholder}
       value={selectedOptionList}
-      style={{ width: 130 }}
+      style={style}
       onChange={(value: number[]) => setSelectedOptionList(value)}
       maxTagCount={maxTagCount}
       options={options}
