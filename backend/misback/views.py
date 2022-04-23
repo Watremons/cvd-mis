@@ -9,7 +9,7 @@ from wsgiref.util import FileWrapper
 from celery.result import AsyncResult
 
 # Import from django libs
-from django.http import JsonResponse, StreamingHttpResponse
+from django.http import JsonResponse, StreamingHttpResponse, HttpResponse
 from django.utils import timezone
 from django.forms.models import model_to_dict
 from django.utils.decorators import method_decorator
@@ -84,16 +84,11 @@ def log_in(request):
                     # 若相同，设置登录状态为True，设置登录id为userId
                     payload = generate_payload(log_in_user.uid, log_in_user.authority)
                     token = generate_token(payload)
-                    # logging.debug(request.session.get('userId', None))
-                    response = JsonResponse({
+                    return JsonResponse({
                         "message": "登录成功",
                         "status": 200,
                         "token": token
-                        })
-                    # response["Access-Control-Allow-Credentials"] = "true"
-                    # response["Access-Control-Allow-Methods"] = 'GET, POST, PATCH, PUT, OPTIONS'
-                    # response["Access-Control-Allow-Headers"] = "Origin,Content-Type,Cookie,Accept,Token"
-                    return response
+                    })
                 else:
                     return JsonResponse({"message": "密码错误", "status": 404})
             except Exception as e:
@@ -104,13 +99,14 @@ def log_in(request):
         else:
             return JsonResponse({"message": "登录表单填写不完整", "status": 404})
     else:
-        return JsonResponse({"message": "请求方式未注册", "status": 404})
+        return JsonResponse({"message": "请求方式未注册", "status": 405})
 
 
 # 获取当前登录用户视图
 # Params: /
 # Return 404 if no token
 # Return 200 if success
+@token_auth
 def get_now_user(request):
     if request.method == "GET":
         token = request.META.get("HTTP_TOKEN", None)
@@ -141,7 +137,37 @@ def get_now_user(request):
         else:
             return JsonResponse({"message": "您尚未登录，请先登录", "status": 401})
     else:
-        return JsonResponse({"message": "请求方式未注册", "status": 404})
+        return JsonResponse({"message": "请求方式未注册", "status": 405})
+
+
+# 获取所有用户基本信息
+# Params: /
+# Return 404 if no token
+# Return 200 if success
+@token_auth
+def user_basic(request):
+    if request.method == "GET":
+        try:
+            query_user_set = models.User.objects.all()
+            user_basic_set = []
+            for user in query_user_set:
+                user_basic_info = {}
+                user_basic_info['uid'] = user.uid
+                user_basic_info['userName'] = user.userName
+                user_basic_set.append(user_basic_info)
+
+            return JsonResponse({
+                "message": "获取基本信息成功",
+                "data": user_basic_set,
+                "status": 200
+            })
+        except Exception as e:
+            logging.error(e.args)
+            logging.error(traceback.format_exc())
+            logging.error('########################################################')
+            return JsonResponse({"message": "检测到可能的恶意攻击，登陆已被拦截", "status": 404, "errorInfo": traceback.format_exc()})
+    else:
+        return JsonResponse({"message": "请求方式未注册", "status": 405})
 
 
 # 登出函数视图
@@ -149,12 +175,13 @@ def get_now_user(request):
 # 前端自己清除对应token
 # 登出成功，返回消息和200状态码
 # 登出失败，返回消息和404状态码
+@token_auth
 def log_out(request):
     if request.method == "POST":
         request.session.flush()
         return JsonResponse({"message": "登出成功", "status": 200})
     else:
-        return JsonResponse({"message": "请求方式未注册", "status": 404})
+        return JsonResponse({"message": "请求方式未注册", "status": 405})
 
 
 # 注册函数视图
@@ -195,7 +222,7 @@ def sign_up(request):
         else:
             return JsonResponse({"message": "注册表单填写不完整", "status": 404})
     else:
-        return JsonResponse({"message": "请求方式未注册", "status": 404})
+        return JsonResponse({"message": "请求方式未注册", "status": 405})
 
 
 # 创建Project视图
@@ -250,9 +277,9 @@ def create_project(request):
                 logging.error('########################################################')
                 return JsonResponse({"message": "数据库出错，创建失败", "status": 404, "errorInfo": traceback.format_exc()})
         else:
-            return JsonResponse({"message": "表单填写不完整", "status": 404})
+            return JsonResponse({"message": "表单填写不完整", "status": 406})
     else:
-        return JsonResponse({"message": "请求方式未注册", "status": 404})
+        return JsonResponse({"message": "请求方式未注册", "status": 405})
 
 
 # run_detect(run-detect)运行指定检测项目
@@ -298,9 +325,9 @@ def run_detect(request):
                 logging.error('########################################################')
                 return JsonResponse({"message": "数据库错误", "status": 404, "errorInfo": traceback.format_exc()})
         else:
-            return JsonResponse({"message": "表单填写不完整", "status": 404})
+            return JsonResponse({"message": "表单填写不完整", "status": 406})
     else:
-        return JsonResponse({"message": "请求方式未注册", "status": 404})
+        return JsonResponse({"message": "请求方式未注册", "status": 405})
 
 
 # async_result(async-result)通过处理task_id获取结果
@@ -333,9 +360,9 @@ def async_result(request, taskId):
                 logging.error('########################################################')
                 return JsonResponse({"message": "数据库错误", "status": 404, "errorInfo": traceback.format_exc()})
         else:
-            return JsonResponse({"message": "表单填写不完整", "status": 404})
+            return JsonResponse({"message": "表单填写不完整", "status": 406})
     else:
-        return JsonResponse({"message": "请求方式未注册", "status": 404})
+        return JsonResponse({"message": "请求方式未注册", "status": 405})
 
 
 # get_video(get-video)以视频流的形式返回视频文件
@@ -375,9 +402,9 @@ def get_video(request, pk, filename):
                 logging.error('########################################################')
                 return JsonResponse({"message": "数据库错误", "status": 404, "errorInfo": traceback.format_exc()})
         else:
-            return JsonResponse({"message": "表单填写不完整", "status": 404})
+            return JsonResponse({"message": "表单填写不完整", "status": 406})
     else:
-        return JsonResponse({"message": "请求方式未注册", "status": 404})
+        return JsonResponse({"message": "请求方式未注册", "status": 405})
 
 
 # Classes inherited from ModelViewSet which can generate RESTFUL URI
@@ -392,6 +419,16 @@ class UserViewSet(viewsets.ModelViewSet):
     # 默认按uid排序, 可按uid或userProjectNum排序
     ordering = ['uid']
     ordering_fields = ['uid']
+
+    # 重写创建函数，检查用户名是否重复
+    def create(self, request, *args, **kwargs):
+        user_name = request.POST.get('userName', None)
+        if not user_name:
+            return HttpResponse(status=406, content="表单填写不完整：缺少用户名")
+        now_user = models.User.objects.filter(userName=user_name)
+        if now_user.exists():
+            return HttpResponse(status=406, content="用户名已存在，请重新输入")
+        return super(UserViewSet, self).create(request, *args, **kwargs)
 
 
 @method_decorator(token_auth, name='dispatch')
