@@ -37,6 +37,7 @@ declare namespace Entity {
     videoFile: string;
     projectStatus: number;
     uid: number;
+    projectUserName: string;
     taskId?: string;
     description?: string;
     projectHeatmapUrl?: string;
