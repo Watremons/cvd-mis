@@ -12,6 +12,10 @@ declare namespace API {
     data: Entity.User;
   };
 
+  type IAsyncResult = IResult & {
+    data: { [key: string]: string | number };
+  };
+
   type IPageResult = {
     pageSize: number;
     current: number;
@@ -69,5 +73,22 @@ declare namespace API {
     videoFileName: string;
     description?: string;
     videoFile?: File;
+  };
+
+  type IQueryProjectParams = IPageParams & {
+    projectStatus?: string;
+    uid?: string;
+    ordering?: string;
+    search?: string;
+  };
+
+  type IChooseProjectParams = {
+    pid: number;
+  };
+
+  type IDeleteProjectParams = IChooseProjectParams;
+
+  type IQueryAsyncResultParams = {
+    taskId: string;
   };
 }
