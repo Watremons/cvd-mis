@@ -44,13 +44,13 @@ export default function UserCreate(props: IUserCreateProps) {
               return true;
             } else {
               await deleteUser({ uid: uid });
-              throw Error(`Create UserLoginData Error: ${createUserLoginRes}`);
+              throw Error(`Create UserLoginData Error: ${createUserLoginRes.data}`);
             }
           } else {
-            throw Error(`Create User Error: ${createUserRes}`);
+            throw Error(`Create User Error: ${createUserRes.data}`);
           }
         } catch (error) {
-          message.error('创建用户失败，请重试！');
+          message.error(`创建用户失败:${error}`);
           console.error(error);
         }
         onCreateFinish();
