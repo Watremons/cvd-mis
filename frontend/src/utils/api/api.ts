@@ -39,7 +39,7 @@ export async function deleteUser(body: API.IDeleteUserParams): Promise<AxiosResp
   return request.delete(`/misback/user/${body.uid}/`);
 }
 
-/** REST修改用户信息接口 DELETE /api/misback/user/<int:pk>/ */
+/** REST修改用户信息接口 PUT /api/misback/user/<int:pk>/ */
 export async function updateUser(body: API.IUpdateUserParams): Promise<AxiosResponse<Entity.User>> {
   return request.put(`/misback/user/${body.uid}/`, toFormdata(body));
 }
@@ -47,6 +47,11 @@ export async function updateUser(body: API.IUpdateUserParams): Promise<AxiosResp
 /** REST新增用户登录信息接口 POST /api/misback/logindata */
 export async function createLoginData(body: API.ICreateLoginDataParams): Promise<AxiosResponse<Entity.LoginData>> {
   return request.post('/misback/logindata/', toFormdata(body));
+}
+
+/** REST修改用户登录信息接口 DELETE /api/misback/logindata/<int:pk>/ */
+export async function updateLoginData(body: API.IUpdateLoginDataParams): Promise<AxiosResponse<Entity.User>> {
+  return request.put(`/misback/logindata/${body.uid}/`, toFormdata(body));
 }
 
 // 项目管理

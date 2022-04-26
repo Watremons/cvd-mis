@@ -68,6 +68,11 @@ declare namespace API {
     password: string;
   };
 
+  type IUpdateLoginDataParams = {
+    uid: number;
+    password: string;
+  };
+
   type ICreateProjectParams = {
     projectName: string;
     videoFileName: string;
