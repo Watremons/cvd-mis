@@ -35,9 +35,12 @@ export default function UserEdit(props: IUserEditProps) {
           if (updateUserRes.status === 200) {
             message.success('修改用户信息成功');
             return true;
+          } else {
+            throw Error(`Update User Error:${updateUserRes.data}`);
           }
         } catch (error) {
-          message.error('修改用户信息失败，请重试！');
+          message.error(`修改用户信息失败:${error}`);
+          console.error(error);
         }
         onCreateFinish();
         return false;

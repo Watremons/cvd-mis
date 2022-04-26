@@ -52,6 +52,9 @@ export default function LoginPage() {
         if (msg.data.token) {
           values.autoLogin ? localStorage.setItem('token', msg.data.token) : sessionStorage.setItem('token', msg.data.token);
           const { data } = await fetchNowUser();
+          if (data.status !== 200) {
+            throw Error(`Get Now User Info Error: ${data.message}`);
+          }
           const userInfo = data.data;
           if (msg.data.token) {
             if (values.autoLogin) {
