@@ -430,6 +430,15 @@ class UserViewSet(viewsets.ModelViewSet):
             return HttpResponse(status=406, content="用户名已存在，请重新输入")
         return super(UserViewSet, self).create(request, *args, **kwargs)
 
+    # 重写更新函数，检查用户名是否重复
+    def partial_update(self, request, *args, **kwargs):
+        user_name = request.POST.get('userName', None)
+        if user_name:
+            now_user = models.User.objects.filter(userName=user_name)
+            if now_user.exists():
+                return HttpResponse(status=406, content="用户名已存在，请重新输入")
+        return super(UserViewSet, self).partial_update(request, *args, **kwargs)
+
 
 @method_decorator(token_auth, name='dispatch')
 class LoginDataViewSet(viewsets.ModelViewSet):
