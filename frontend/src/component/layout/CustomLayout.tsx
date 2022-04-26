@@ -14,11 +14,6 @@ export default function CustomLayout(props: { children: ReactElement }) {
       <Layout>
         <CustomSider />
         <Layout style={{ padding: '0 24px 24px' }}>
-          {/* <Breadcrumb style={{ margin: '16px 0' }}>
-            <Breadcrumb.Item key="dashboard">Dashboard</Breadcrumb.Item>
-            <Breadcrumb.Item key="list">List</Breadcrumb.Item>
-            <Breadcrumb.Item key="app">App</Breadcrumb.Item>
-          </Breadcrumb> */}
           <Content
             className="site-layout-background"
             style={{
