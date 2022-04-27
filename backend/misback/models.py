@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Q
 
 
 # Create your models here.
@@ -14,6 +15,26 @@ class User(models.Model):
     createDate = models.DateField(db_column='create_date', null=False, auto_now_add=True, verbose_name='用户注册时间')
     authority = models.IntegerField(db_column='authority', default=0, null=False, choices=AUTH_TYPE, verbose_name='用户权限')
     description = models.CharField(db_column='description', max_length=50, null=True, verbose_name='备注')
+
+    def to_dict(self, fields=None, exclude=None):
+        data = {}
+        for f in self._meta.concrete_fields + self._meta.many_to_many:
+            value = f.value_from_object(self)
+
+            if fields and f.name not in fields:
+                continue
+
+            if exclude and f.name in exclude:
+                continue
+
+            if isinstance(f, models.DateField):
+                value = value.strftime('%Y-%m-%d') if value else None
+
+            data[f.name] = value
+
+            data['userProjectNum'] = Project.objects.filter(Q(uid=self.uid)).count()
+
+        return data
 
     class Meta:
         db_table = 'user'
