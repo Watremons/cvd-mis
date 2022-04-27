@@ -2,7 +2,7 @@ import React from 'react';
 import { Dropdown, Layout, Menu, message } from 'antd';
 import { DownOutlined, LogoutOutlined } from '@ant-design/icons';
 
-import logo from '../../logo.svg';
+import logo from '../../assets/logo.svg';
 import './CustomHeader.less';
 
 import { logout } from '../../utils/api/api';

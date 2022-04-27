@@ -5,7 +5,7 @@ import { LoginForm, ProFormCheckbox, ProFormText } from '@ant-design/pro-form';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 
-import logo from '../../logo.svg';
+import logo from '../../assets/logo.svg';
 import './LoginPage.less';
 import CustomFooter from '../../component/layout/CustomFooter';
 
