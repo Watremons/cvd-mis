@@ -1,31 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { Row, Col, Menu, message } from 'antd';
+import React, { useState } from 'react';
+import { Row, Col, Menu } from 'antd';
 
-import { defaultUser } from './constant';
-import { fetchNowUser } from '../../utils/api/api';
 import ErrorPage from '../error/ErrorPage';
 import UserInfo from './UserInfo';
 import UserPasswordEdit from './UserPasswordEdit';
+import { useAppSelector } from '../../redux/hook';
 
 export default function UserSetting() {
   const [selectedMenuKey, setSelectedMenuKey] = useState<string>('user-info');
-  const [nowUserInfo, setNowUserInfo] = useState<Entity.User>(defaultUser);
-
-  useEffect(() => {
-    fetchNowUser()
-      .then(({ data }) => {
-        if (data.status === 200) {
-          setNowUserInfo(data.data);
-        } else {
-          setNowUserInfo({ ...defaultUser, uid: -1 });
-          throw Error(`Get Now User Info Error: ${data.message}`);
-        }
-      })
-      .catch(error => {
-        message.error(`获取登录用户信息失败:${error}`);
-        console.error(error);
-      });
-  }, []);
+  const nowUserInfo = useAppSelector(state => state.userReducer);
 
   const renderContent = () => {
     switch (selectedMenuKey) {

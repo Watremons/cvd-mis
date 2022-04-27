@@ -1,12 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { defaultUser } from '../../pages/user/constant';
 
-const initialState: Entity.User = {
-  uid: 0,
-  userName: '未知用户',
-  createDate: 0,
-  userProjectNum: 0,
-  authority: 0
-};
+const initialState: Entity.User = defaultUser;
 
 export const userSlice = createSlice({
   name: 'user',
@@ -15,8 +10,11 @@ export const userSlice = createSlice({
     changeUser: (state, action: PayloadAction<Entity.User>) => {
       state.uid = action.payload.uid;
       state.userName = action.payload.userName;
+      state.userDes = action.payload.userDes;
       state.createDate = action.payload.createDate;
       state.authority = action.payload.authority;
+      state.userProjectNum = action.payload.userProjectNum;
+      state.description = action.payload.description;
     }
   }
 });
