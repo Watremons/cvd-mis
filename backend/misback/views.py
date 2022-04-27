@@ -11,7 +11,6 @@ from celery.result import AsyncResult
 # Import from django libs
 from django.http import JsonResponse, StreamingHttpResponse, HttpResponse
 from django.utils import timezone
-from django.forms.models import model_to_dict
 from django.utils.decorators import method_decorator
 
 # Import from DRF lib
@@ -113,20 +112,19 @@ def get_now_user(request):
         if token:
             try:
                 data = extract_token(token)
-                if data['uid']:
-                    query_user_set = models.User.objects.filter(pk=data['uid'])
-                    if not query_user_set.exists():
-                        return JsonResponse({"message": "该账号不存在", "status": 404})
-                    now_user = query_user_set.first()
-                else:
+                if not data['uid']:
                     return JsonResponse({
                         "message": "用户信息验证失败，token错误",
                         "status": 404
                     })
 
+                query_user_set = models.User.objects.filter(pk=data['uid'])
+                if not query_user_set.exists():
+                    return JsonResponse({"message": "该账号不存在", "status": 404})
+                now_user = query_user_set.first()
                 return JsonResponse({
                     "message": "获取当前账号成功",
-                    "data": model_to_dict(now_user),
+                    "data": now_user.to_dict(),
                     "status": 200
                 })
             except Exception as e:
