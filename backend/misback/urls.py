@@ -19,6 +19,8 @@ urlpatterns = [
     path('get-video/<int:pk>/<str:filename>/', views.get_video, name='get-video'),
     # async_result(async-result)获取检测模型运行状态
     path('async-result/<str:taskId>/', views.async_result, name='async-result'),
+    # get_user_stat(user-stat)获取新增用户统计信息
+    path('user-stat/', views.get_user_stat, name='user-stat'),
 
     # 以下为对任意模型的增删改查
 

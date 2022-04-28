@@ -7,11 +7,13 @@ import traceback
 import logging
 from wsgiref.util import FileWrapper
 from celery.result import AsyncResult
+from dateutil.relativedelta import relativedelta
 
 # Import from django libs
 from django.http import JsonResponse, StreamingHttpResponse, HttpResponse
 from django.utils import timezone
 from django.utils.decorators import method_decorator
+from django.db.models import Count
 
 # Import from DRF lib
 from django_filters.rest_framework import DjangoFilterBackend
@@ -403,6 +405,44 @@ def get_video(request, pk, filename):
             return JsonResponse({"message": "表单填写不完整", "status": 406})
     else:
         return JsonResponse({"message": "请求方式未注册", "status": 405})
+
+
+# get_user_stat(get-user-stat)新增用户统计信息模型
+# Params: null
+# Return 404 if error
+# Return 200 if success
+@token_auth
+def get_user_stat(request):
+    if request.method == "GET":
+        try:
+            nowDate = timezone.now().date().replace(day=1)
+            pastLimitDate = nowDate + relativedelta(months=-4)
+
+            jsonList = []
+            for _ in range(5):
+                userInfo = models.User.objects\
+                    .filter(createDate__gte=pastLimitDate)\
+                    .filter(createDate__lt=pastLimitDate + relativedelta(months=+1))\
+                    .aggregate(userCount=Count("uid"))
+
+                statInfoDict = {
+                    "date": pastLimitDate.strftime("%Y.%m"),
+                    "userCount": userInfo["userCount"]
+                }
+                jsonList.append({**statInfoDict})
+                pastLimitDate = pastLimitDate + relativedelta(months=+1)
+            jsonRes = json.loads(json.dumps(jsonList, cls=DateEnconding))
+            # logging.debug(jsonRes)
+            return JsonResponse({"data": jsonRes, "message": "信息获取成功", "status": 200})
+        except Exception as e:
+            logging.error('str(Exception):\t', str(Exception))
+            logging.error('str(e):\t\t', str(e))
+            logging.error('repr(e):\t', repr(e))
+            logging.error('e.message:\t', e.args)
+            logging.error('########################################################')
+            return JsonResponse({"message": "数据库出错，无法获得各月注册用户数", "status": 404})
+    else:
+        return JsonResponse({"message": "请求方法未注册", "status": 404})
 
 
 # Classes inherited from ModelViewSet which can generate RESTFUL URI
