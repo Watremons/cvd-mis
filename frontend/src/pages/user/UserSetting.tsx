@@ -22,7 +22,7 @@ export default function UserSetting() {
   return (
     <Row>
       <Col span={2}>
-        <Menu mode="inline">
+        <Menu mode="inline" defaultSelectedKeys={['user-info']}>
           <Menu.Item key="user-info" onClick={() => setSelectedMenuKey('user-info')}>
             修改用户信息
           </Menu.Item>
