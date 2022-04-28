@@ -39,7 +39,7 @@ export default function LoginPage() {
   const [loginResult, setLoginResult] = useState<API.ILoginResult>(defaultLoginResult);
 
   if (getToken()) {
-    if (navigate) navigate('/', { replace: true });
+    navigate('/dashboard', { replace: true });
   }
   const handleSubmit = async (values: ILoginObj) => {
     try {
