@@ -2,6 +2,12 @@ import { AxiosResponse } from 'axios';
 import { joinQueryUrl, toFormdata, toRawFormdata } from '../utils';
 import { request } from './request';
 
+// 统计信息相关
+/** 获取用户注册统计信息接口 GET /misback/user-stat/ */
+export async function fetchUserStat(): Promise<AxiosResponse<API.IUserStatResult>> {
+  return request.get('/misback/user-stat/');
+}
+
 // 登录相关
 /** 登录接口 POST /misback/login */
 export async function login(body: API.ILoginParams): Promise<AxiosResponse<API.ILoginResult>> {
@@ -65,7 +71,7 @@ export async function fetchProjects(body: API.IQueryProjectParams): Promise<Axio
   return request.get(joinQueryUrl('/misback/project', body));
 }
 
-/** REST删除检测项目接口(重写) DELETE /api/misback/project/<int:pk>/ */
+/** REST删除检测项目接口 DELETE /api/misback/project/<int:pk>/ */
 export async function deleteProject(body: API.IDeleteProjectParams): Promise<AxiosResponse<Entity.Project>> {
   return request.delete(`/misback/project/${body.pid}/`);
 }

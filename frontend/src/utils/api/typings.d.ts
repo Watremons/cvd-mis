@@ -4,6 +4,13 @@ declare namespace API {
     status: number;
   };
 
+  type IUserStatResult = IResult & {
+    data: {
+      date: string;
+      userCount: number;
+    }[];
+  };
+
   type ILoginResult = IResult & {
     token?: string;
   };
