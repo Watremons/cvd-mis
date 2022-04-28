@@ -120,8 +120,12 @@ def video_vibrate_detect(pid: int, video_file: str, make_pic: int):
     # print("FPS = {0}".format(capture.get(cv2.CAP_PROP_FPS)))
     # print("Frame Number = {0}".format(capture.get(cv2.CAP_PROP_FRAME_COUNT)))
 
+    # 获取原始视频宽度和高度
+    width = int(capture.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
     fourcc = cv2.VideoWriter_fourcc(*"avc1")
-    out = cv2.VideoWriter(os.path.join(out_dir, '{0}_result.mp4'.format(pid)), fourcc, 25, (600, 584))
+    out = cv2.VideoWriter(os.path.join(out_dir, '{0}_result.mp4'.format(pid)), fourcc, 25, (width, height))
 
     fps = 0.0
     points = []
