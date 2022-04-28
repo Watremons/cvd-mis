@@ -35,6 +35,7 @@ def cvd_detect_task(pid: int, video_file: str, make_pic: int):
         if not query_project_set.exists():
             return ({"message": "检测项目pid错误", "status": -1})
         query_project_set.update(projectStatus=2)
+        os.remove(script_path)
 
         return ({"message": result, "status": 0})
     except subprocess.CalledProcessError as exc:
