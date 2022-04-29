@@ -10,7 +10,6 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState<boolean>(true);
 
   const nowUserInfo = useAppSelector(state => state.userReducer);
-  console.log('nowUserInfo', nowUserInfo);
   useEffect(() => {
     if (nowUserInfo.uid > 0) {
       setLoading(false);
