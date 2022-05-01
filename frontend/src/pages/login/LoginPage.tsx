@@ -110,7 +110,8 @@ export default function LoginPage() {
                   {
                     required: true,
                     message: '请输入用户名!'
-                  }
+                  },
+                  { type: 'string', min: 6, max: 20, message: '用户名为6-20字符的英文字符或数字' }
                 ]}
               />
               <ProFormText.Password
@@ -124,7 +125,8 @@ export default function LoginPage() {
                   {
                     required: true,
                     message: '请输入密码！'
-                  }
+                  },
+                  { type: 'string', min: 6, max: 20, message: '密码为6-20字符的英文字符或数字' }
                 ]}
               />
             </>
