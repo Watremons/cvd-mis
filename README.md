@@ -88,7 +88,10 @@ torch.cuda.current_device()
 ```
 
 ### 1.2.前端运行相关配置
-
+```
+nodejs v16.13.0
+npm 8.1.0
+```
 ### 1.3.后端运行相关配置
 
 Python版本：3.9.7（随anaconda安装）
