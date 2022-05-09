@@ -134,7 +134,6 @@ pip install pycocotools
 pip install pyheatmap
 pip install celery
 pip install eventlet
-pip install django-eventstream
 ```
 
 ## 2.数据库设计
